@@ -11,3 +11,29 @@ Faire en sorte que la structure de base soit présente dans base.html.twig, les 
 et faire en sorte que le coeur de la page, soit présent dans le fichier index.html.twig
 (à la manière de notre projet précédent)
 
+Création d'une nouvelle Entity Produit:
+
+Les éléments qui caractérisent un Produit:
+	- Name 			-> String, 255, Non Null
+	- Price 		-> Float (Nombre à virgule), Non Null
+	- Stock 		-> Integer (Entier), Non Null
+	- Description 	-> Text, Non Null
+	- Category		-> Relation avec Entité Category (ManyToOne)
+	- Tag			-> Relation avec Entité Tag (ManyToMany)
+
+Les éléments qui caractérisent une Catégorie:
+	- Name			-> String, 255, Non Null
+	- Description 	-> Text, Non null
+	- Produit 		-> Relation avec l'Entité Produit (OneToMany)
+
+Les éléments qui caractérisent un Tag:
+	- Name 			-> String, 255, Non Null
+	- Produit 		-> Relation avec l'Entité Produit (ManyToMany)
+
+NE FAITES QUE PRODUIT ET TAG, NE PAS FAIRE L'ENTITY OU LES VARIABLES RELATIVES A CATEGORY
+-
+Utiliser Powershell pour créer une Entity:
+	php bin/console make:entity (pour les relations 1toM ou Mto1 etc... rentrer le type "relation")
+Ne pas utiliser le terminal pour créer les relations entre Entity, le faire à la main selon le modèle du projet précédent, puis écrire dans le terminal:
+	php bin/console make:entity --regenerate App
+
