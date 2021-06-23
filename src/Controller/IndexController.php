@@ -15,26 +15,4 @@ class IndexController extends AbstractController
     {
         return $this->render('index/index.html.twig');
     }
-
-    /**
-     * @Route("/band",name="index_band")
-     */
-    public function indexBand(): Response
-    {
-        return $this->render('index/band.html.twig');
-    }
-    /**
-     * @Route("/tour",name="index_tour")
-     */
-    public function indexTour(): Response
-    {
-        return $this->render('index/tour.html.twig');
-    }
-    /**
-     * @Route("/contact",name="index_contact")
-     */
-    public function indexContact(): Response
-    {
-        return $this->render('index/contact.html.twig');
-    }
 }
