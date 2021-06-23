@@ -1,7 +1,0 @@
-Nouveau projet: symfony_ecom
-
-	Créer un nouveau projet Symfony
-	Configurer le fichier .env
-	Créer la nouvelle base de données
-	Créer un nouveau Controller, avec une fonction index
-	Faire en sorte que cette fonction index() affiche le message "Bienvenue, Symfony Ecom" dans son titre <h1>
