@@ -6,15 +6,27 @@
 				<i class="fa fa-bars"></i>
 			</a>
 			<a href="#" class="w3-bar-item w3-button w3-padding-large">HOME</a>
-			<a href="#band" class="w3-bar-item w3-button w3-padding-large w3-hide-small">BAND</a>
+			{% if categories is defined %}
+				<div class="w3-dropdown-hover w3-hide-small">
+					<button class="w3-padding-large w3-button" title="More">CATEGORIES
+						<i class="fa fa-caret-down"></i>
+					</button>
+					<div class="w3-dropdown-content w3-bar-block w3-card-4">
+						<a href="#" class="w3-bar-item w3-button">TABLEAU D'ADMINISTRATION</a>
+						{% for category in categories %}
+							<a href="#" class="w3-bar-item w3-button">{{ category.name }}</a>
+						{% endfor %}
+					</div>
+				</div>
+			{% endif %}
 			<a href="#tour" class="w3-bar-item w3-button w3-padding-large w3-hide-small">TOUR</a>
 			<a href="#contact" class="w3-bar-item w3-button w3-padding-large w3-hide-small">CONTACT</a>
 			<div class="w3-dropdown-hover w3-hide-small">
-				<button class="w3-padding-large w3-button" title="More">MORE
+				<button class="w3-padding-large w3-button" title="More">OPTIONS
 					<i class="fa fa-caret-down"></i>
 				</button>
 				<div class="w3-dropdown-content w3-bar-block w3-card-4">
-					<a href="#" class="w3-bar-item w3-button">Merchandise</a>
+					<a href="#" class="w3-bar-item w3-button">TABLEAU D'ADMINISTRATION</a>
 					<a href="#" class="w3-bar-item w3-button">Extras</a>
 					<a href="#" class="w3-bar-item w3-button">Media</a>
 				</div>

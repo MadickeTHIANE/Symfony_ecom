@@ -61,6 +61,29 @@ class Produit
         $this->tags = new ArrayCollection();
     }
 
+    public function getPlaceholder()
+    {
+        if (!$this->getCategory()) {
+            return 'placeholder_none.jpg';
+        } else {
+            $categoryName = strtolower($this->getCategory()->getName());
+            switch ($categoryName) {
+                case 'bureau':
+                    return 'placeholder_bureau.jpg';
+                case 'armoire':
+                    return 'placeholder_armoire.jpg';
+                case 'canape':
+                    return 'placeholder_canape.jpg';
+                case 'chaise':
+                    return 'placeholder_chaise.jpg';
+                case 'lit':
+                    return 'placeholder_lit.jpg';
+                default:
+                    return 'placeholder_none.jpg';
+            }
+        }
+    }
+
     public function getId(): ?int
     {
         return $this->id;
