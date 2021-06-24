@@ -5,7 +5,7 @@ Configurer le fichier .env
 Créer la nouvelle base de données
 Créer un nouveau Controller, avec une fonction index
 Faire en sorte que cette fonction index() affiche le message "Bienvenue, Symfony Ecom" dans son titre <h1>
-
+========================================================================================================================================================================================================================================================================================================================================================
 Récupérer le template indiqué, ainsi que les fichiers CSS correspondants, et l'adapter afin qu'il puisse s'afficher au sein de notre nouvelle application Symfony (excepté les images autre que les vignettes)
 Faire en sorte que la structure de base soit présente dans base.html.twig, les éléments supplémentaires dans différents fichiers dans un dossier layout que vous allez créer
 et faire en sorte que le coeur de la page, soit présent dans le fichier index.html.twig
@@ -36,4 +36,11 @@ Utiliser Powershell pour créer une Entity:
 	php bin/console make:entity (pour les relations 1toM ou Mto1 etc... rentrer le type "relation")
 Ne pas utiliser le terminal pour créer les relations entre Entity, le faire à la main selon le modèle du projet précédent, puis écrire dans le terminal:
 	php bin/console make:entity --regenerate App
-
+========================================================================================================================================================================================================================================================================================================================================================
+Télécharger orm-fixtures via Composer
+Créer : 
+Pour les Category: 5 Category: Armoire, Lit, Bureau, Chaise, Canapé
+Pour les Produits: 15 Produits de votre choix
+Pour les Tags: "Pas cher", "Promotion", "Bois", "Neuf", "Nouveau", etc
+Faire cela en créant les trois classes Fixtures ProduitFixtures, TagFixtures et CategoryFixtures
+========================================================================================================================================================================================================================================================================================================================================================

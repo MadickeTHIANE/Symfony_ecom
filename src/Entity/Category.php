@@ -34,11 +34,11 @@ class Category
      * @ORM\OneToMany(targetEntity=Produit::class, mappedBy="category")
      * @ORM\JoinColumn(nullable=true)
      */
-    private $produit;
+    private $produits;
 
     public function __construct()
     {
-        $this->produit = new ArrayCollection();
+        $this->produits = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -75,13 +75,13 @@ class Category
      */
     public function getProduit(): Collection
     {
-        return $this->produit;
+        return $this->produits;
     }
 
     public function addProduit(Produit $produit): self
     {
-        if (!$this->produit->contains($produit)) {
-            $this->produit[] = $produit;
+        if (!$this->produits->contains($produit)) {
+            $this->produits[] = $produit;
             $produit->setCategory($this);
         }
 
@@ -90,7 +90,7 @@ class Category
 
     public function removeProduit(Produit $produit): self
     {
-        if ($this->produit->removeElement($produit)) {
+        if ($this->produits->removeElement($produit)) {
             // set the owning side to null (unless already changed)
             if ($produit->getCategory() === $this) {
                 $produit->setCategory(null);
@@ -98,5 +98,13 @@ class Category
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection|Produit[]
+     */
+    public function getProduits(): Collection
+    {
+        return $this->produits;
     }
 }

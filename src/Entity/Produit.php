@@ -44,11 +44,12 @@ class Produit
 
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Tag",inversedBy="Produit" ,cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="App\Entity\Tag",inversedBy="produits" ,cascade={"persist"})
      * @ORM\JoinColumn(nullable=true)
      */
-    private $tag;
+    private $tags;
 
+    //* le ManyToOne toujours avec inversedBy, et non mappedBy
     /**
      * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="produit")
      * @ORM\JoinColumn(nullable=true)
@@ -57,7 +58,7 @@ class Produit
 
     public function __construct()
     {
-        $this->tag = new ArrayCollection();
+        $this->tags = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -118,13 +119,13 @@ class Produit
      */
     public function getTag(): Collection
     {
-        return $this->tag;
+        return $this->tags;
     }
 
     public function addTag(Tag $tag): self
     {
-        if (!$this->tag->contains($tag)) {
-            $this->tag[] = $tag;
+        if (!$this->tags->contains($tag)) {
+            $this->tags[] = $tag;
         }
 
         return $this;
@@ -132,7 +133,7 @@ class Produit
 
     public function removeTag(Tag $tag): self
     {
-        $this->tag->removeElement($tag);
+        $this->tags->removeElement($tag);
 
         return $this;
     }
@@ -147,5 +148,13 @@ class Produit
         $this->category = $category;
 
         return $this;
+    }
+
+    /**
+     * @return Collection|Tag[]
+     */
+    public function getTags(): Collection
+    {
+        return $this->tags;
     }
 }

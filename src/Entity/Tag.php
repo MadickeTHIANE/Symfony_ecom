@@ -26,14 +26,14 @@ class Tag
     private $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Produit",inversedBy="Tag" ,cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="App\Entity\Produit",mappedBy="tags" ,cascade={"persist"})
      * @ORM\JoinColumn(nullable=true)
      */
-    private $produit;
+    private $produits;
 
     public function __construct()
     {
-        $this->produit = new ArrayCollection();
+        $this->produits = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -58,13 +58,13 @@ class Tag
      */
     public function getProduit(): Collection
     {
-        return $this->produit;
+        return $this->produits;
     }
 
     public function addProduit(Produit $produit): self
     {
-        if (!$this->produit->contains($produit)) {
-            $this->produit[] = $produit;
+        if (!$this->produits->contains($produit)) {
+            $this->produits[] = $produit;
         }
 
         return $this;
@@ -72,8 +72,16 @@ class Tag
 
     public function removeProduit(Produit $produit): self
     {
-        $this->produit->removeElement($produit);
+        $this->produits->removeElement($produit);
 
         return $this;
+    }
+
+    /**
+     * @return Collection|Produit[]
+     */
+    public function getProduits(): Collection
+    {
+        return $this->produits;
     }
 }
