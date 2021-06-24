@@ -73,7 +73,7 @@ class Category
     /**
      * @return Collection|Produit[]
      */
-    public function getProduit(): Collection
+    public function getProduits(): Collection
     {
         return $this->produits;
     }
@@ -98,13 +98,5 @@ class Category
         }
 
         return $this;
-    }
-
-    /**
-     * @return Collection|Produit[]
-     */
-    public function getProduits(): Collection
-    {
-        return $this->produits;
     }
 }
