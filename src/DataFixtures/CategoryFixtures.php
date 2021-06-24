@@ -2,29 +2,36 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Category;
-use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Persistence\ObjectManager;
 
 class CategoryFixtures extends Fixture
 {
         public function load(ObjectManager $manager)
         {
+                //Cette fonction sera chargée suite à la commande php bin/console doctrine:fixtures:load
 
-                $categoryInfos = [
-                        ["name" => "Armoire", "description" => "Une armoire est un meuble fermé, généralement en bois, toujours adossé à un mur, que l'on trouve dans une habitation."],
-                        ["name" => "Lit", "description" => "Meuble sur lequel on se couche pour dormir, généralement composé d’un cadre de bois ou de métal, qu’on garnit d’un sommier ou d’une paillasse, d’un ou plusieurs matelas, d’un traversin, d’un ou plusieurs oreillers, de draps et de couvertures."],
-                        ["name" => "Bureau", "description" => "Meuble à tiroirs et à tablettes où l’on enferme des papiers et sur lequel on écrit."],
-                        ["name" => "Chaise", "description" => "Siège avec dossier, sans accoudoirs."],
-                        ["name" => "Canapé", "description" => "Sorte de siège long à dossier, où plusieurs personnes peuvent être assises ensemble et qui peut servir aussi de lit de repos."],
+                // $product = new Product();
+                // $manager->persist($product);
+
+                //Nous allons créer un tableau categoryArray de plusieurs données représentant plusieurs instances de l'Entity Category à envoyer à notre base de données. categoryArray est un tableau de tableaux associatifs, chacun contenant les valeurs à remplir pour chaque champ de l'instance d'Entity
+
+                $categoryArray = [
+                        ["name" => "Table", "description" => "Tables"],
+                        ["name" => "Chaise", "description" => "Chaises"],
+                        ["name" => "Armoire", "description" => "Armoires"],
+                        ["name" => "Bureau", "description" => "Bureaux"],
+                        ["name" => "Lit", "description" => "Lits"],
                 ];
 
-                foreach ($categoryInfos as $categoryInfo) {
-                        $category = new Category();
-                        $category->setName($categoryInfo['name']);
-                        $category->setDescription($categoryInfo['description']);
+                //La boucle foreach parcourt notre tableau categoryArray, et à chaque tour, crée une instance de l'Entity Category, la remplit avec les valeurs du tableau associatif actuellement parcouru, et effectue une demande de persistance. Nous aurons donc autant de demandes de persistences qu'il existe d'entrées dans notre tableau categoryArray.
+                foreach ($categoryArray as $categoryData) {
+                        $category = new \App\Entity\Category;
+                        $category->setName($categoryData['name']);
+                        $category->setDescription($categoryData['description']);
                         $manager->persist($category);
                 }
+
                 $manager->flush();
         }
 }
