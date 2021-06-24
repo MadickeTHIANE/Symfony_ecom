@@ -2,9 +2,10 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Entity\Produit;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  *@Route("/admin")
@@ -16,6 +17,15 @@ class AdminController extends AbstractController
      */
     public function adminDashboard(): Response
     {
-        return $this->render('admin/admin-dashboard.html.twig', []);
+        $entityManager = $this->getDoctrine()->getManager();
+        $produitRepository = $entityManager->getRepository(Produit::class);
+        $produits = $produitRepository->findAll();
+        return $this->render('admin/admin-dashboard.html.twig', [
+            "produits" => $produits
+        ]);
+    }
+
+    public function deleteProduct()
+    {
     }
 }
