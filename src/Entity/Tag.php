@@ -53,15 +53,9 @@ class Tag
         return $this;
     }
 
-    /**
-     * @return Collection|Produit[]
-     */
-    public function getProduit(): Collection
-    {
-        return $this->produits;
-    }
 
-    public function addProduit(Produit $produit): self
+
+    public function addProduits(Produit $produit): self
     {
         if (!$this->produits->contains($produit)) {
             $this->produits[] = $produit;
@@ -70,7 +64,7 @@ class Tag
         return $this;
     }
 
-    public function removeProduit(Produit $produit): self
+    public function removeProduits(Produit $produit): self
     {
         $this->produits->removeElement($produit);
 

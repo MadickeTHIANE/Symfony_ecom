@@ -1,0 +1,16 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+	Formulaire{{parent()}}
+{% endblock %}
+
+{% block body %}
+	{% if erreur is defined %}
+		<h1>{{ erreur }}</h1>
+	{% endif %}
+	<div style="max-width: 700px; margin:auto;" class="alert alert-info">
+		<h1 class="display-5">Formulaire :
+			{{ formName }}</h1>
+		{{ form(dataForm) }}
+		</div>
+	{% endblock %}

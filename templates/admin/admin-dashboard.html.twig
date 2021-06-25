@@ -4,24 +4,65 @@
 {% endblock %}
 
 {% block body %}
+
 	<div class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="dashboard">
 		<h1 class="w3-wide">TABLEAU DE BORD</h1>
 
-		<button class="w3-button w3-black w3-margin-bottom">Créer un Produit</button>
-		<button class="w3-button w3-black w3-margin-bottom">Créer une Catégorie</button>
-		<button class="w3-button w3-black w3-margin-bottom">Créer un Tag</button>
+		<a href="{{ path('create_product') }}">
+			<button class="w3-button w3-black w3-margin-bottom">Créer un Produit</button>
+		</a>
+		<a href="{{ path('create_category') }}">
+			<button class="w3-button w3-black w3-margin-bottom">Créer une Catégorie</button>
+		</a>
+		<a href="{{ path('create_tag') }}">
+			<button class="w3-button w3-black w3-margin-bottom">Créer un Tag</button>
+		</a>
 
+		<h3 class="w3-wide w3-border-white w3-white">Liste des Tags</h3>
+
+		<ul class="w3-ul w3-border-white w3-white">
+			{% for tag in tags %}
+				<li class="w3-padding">{{ tag.name }}
+					<div>
+						<a href="{{ path('edit_tag',{'tagId':tag.id})}}">
+							<button class="w3-button w3-yellow w3-margin-bottom">Modifier</button>
+						</a>
+						<a href="{{ path('delete_tag',{'tagId':tag.id}) }}">
+							<button class="w3-button w3-red w3-margin-bottom">Supprimer</button>
+						</a>
+					</div>
+				</li>
+			{% endfor %}
+		</ul>
+		<h3 class="w3-wide w3-border-white w3-white">Liste des Catégories</h3>
+
+		<ul class="w3-ul w3-border-white w3-white">
+			{% for category in categories %}
+				<li class="w3-padding">{{ category.name }}
+					<div>
+						<a href="{{ path('edit_category',{'categoryId':category.id})}}">
+							<button class="w3-button w3-yellow w3-margin-bottom">Modifier</button>
+						</a>
+						<a href="{{ path('delete_category',{'categoryId':category.id}) }}">
+							<button class="w3-button w3-red w3-margin-bottom">Supprimer</button>
+						</a>
+					</div>
+				</li>
+			{% endfor %}
+		</ul>
 		<h3 class="w3-wide w3-border-white w3-white">Liste des Produits</h3>
 
 		<ul class="w3-ul w3-border-white w3-white">
 			{% for produit in produits %}
 				<li class="w3-padding">{{ produit.name }}
-					<a href="#">
-						<button class="w3-button w3-yellow w3-margin-bottom">Modifier</button>
-					</a>
-					<a href="{{ path('delete_product',{'produitId':produit.id}) }}">
-						<button class="w3-button w3-red w3-margin-bottom">Supprimer</button>
-					</a>
+					<div>
+						<a href="{{ path('edit_product',{'produitId':produit.id})}}">
+							<button class="w3-button w3-yellow w3-margin-bottom">Modifier</button>
+						</a>
+						<a href="{{ path('delete_product',{'produitId':produit.id}) }}">
+							<button class="w3-button w3-red w3-margin-bottom">Supprimer</button>
+						</a>
+					</div>
 				</li>
 			{% endfor %}
 		</ul>

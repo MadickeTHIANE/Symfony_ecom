@@ -56,4 +56,21 @@ class IndexController extends AbstractController
             'categories' => $categories
         ]);
     }
+
+    /**
+     * @Route("/produit/details/{produitId}",name="fiche_produit")
+     */
+    public function ficheProduit(Request $request, $produitId)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $produitRepository = $entityManager->getRepository(Produit::class);
+        $selectedProduit = $produitRepository->find($produitId);
+        if (!$selectedProduit) {
+            $this->redirect($this->generateUrl('index'));
+        }
+        $produit = $selectedProduit;
+        return $this->render('index/fiche-produit.html.twig', [
+            "produit" => $produit
+        ]);
+    }
 }

@@ -1,0 +1,30 @@
+{% extends "base.html.twig" %}
+{% block title %}
+	Sélection{{ parent()}}
+{% endblock %}
+
+{% block body %}
+	<div class="row">
+		<div class="col-8">
+			<img src="{{ asset("assets/img/" ~ produit.getPlaceholder) }}" class="w3-round w3-margin-bottom" alt="Random Name" style="width:60%">
+			<p>{{produit.name}}</p>
+			<p>{{produit.category.name}}</p>
+			<ul>
+				{% for tag in produit.tags %}
+					<li>{{tag.name}}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		<div class="col-4">
+			<h2>{{ produit.name }}</h2>
+			<ul>
+				<li>{{ produit.category.name }}</li>
+				<li>{{ produit.price }}€</li>
+				<li>{{ produit.stock }}
+					en stock</li>
+				<li>{{ produit.description }}</li>
+			</ul>
+			<button class="w3 w3-black">Acheter</button>
+		</div>
+	</div>
+{% endblock %}
