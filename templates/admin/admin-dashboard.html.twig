@@ -17,23 +17,24 @@
 		<a href="{{ path('create_tag') }}">
 			<button class="w3-button w3-black w3-margin-bottom">Créer un Tag</button>
 		</a>
-
-		<h3 class="w3-wide w3-border-white w3-white">Liste des Tags</h3>
+		<h3 class="w3-wide w3-border-white w3-white">Liste des Produits</h3>
 
 		<ul class="w3-ul w3-border-white w3-white">
-			{% for tag in tags %}
-				<li class="w3-padding">{{ tag.name }}
+			{% for produit in produits %}
+				<li class="w3-padding">{{ produit.name }}
 					<div>
-						<a href="{{ path('edit_tag',{'tagId':tag.id})}}">
+						<a href="{{ path('edit_product',{'produitId':produit.id})}}">
 							<button class="w3-button w3-yellow w3-margin-bottom">Modifier</button>
 						</a>
-						<a href="{{ path('delete_tag',{'tagId':tag.id}) }}">
+						<a href="{{ path('delete_product',{'produitId':produit.id}) }}">
 							<button class="w3-button w3-red w3-margin-bottom">Supprimer</button>
 						</a>
 					</div>
 				</li>
 			{% endfor %}
 		</ul>
+
+
 		<h3 class="w3-wide w3-border-white w3-white">Liste des Catégories</h3>
 
 		<ul class="w3-ul w3-border-white w3-white">
@@ -50,16 +51,16 @@
 				</li>
 			{% endfor %}
 		</ul>
-		<h3 class="w3-wide w3-border-white w3-white">Liste des Produits</h3>
+		<h3 class="w3-wide w3-border-white w3-white">Liste des Tags</h3>
 
 		<ul class="w3-ul w3-border-white w3-white">
-			{% for produit in produits %}
-				<li class="w3-padding">{{ produit.name }}
+			{% for tag in tags %}
+				<li class="w3-padding">{{ tag.name }}
 					<div>
-						<a href="{{ path('edit_product',{'produitId':produit.id})}}">
+						<a href="{{ path('edit_tag',{'tagId':tag.id})}}">
 							<button class="w3-button w3-yellow w3-margin-bottom">Modifier</button>
 						</a>
-						<a href="{{ path('delete_product',{'produitId':produit.id}) }}">
+						<a href="{{ path('delete_tag',{'tagId':tag.id}) }}">
 							<button class="w3-button w3-red w3-margin-bottom">Supprimer</button>
 						</a>
 					</div>

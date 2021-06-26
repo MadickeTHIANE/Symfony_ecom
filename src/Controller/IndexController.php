@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Tag;
 use App\Entity\Produit;
 use App\Entity\Category;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,11 +20,14 @@ class IndexController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $produitRepository = $entityManager->getRepository(Produit::class);
         $categoryRepository = $entityManager->getRepository(Category::class);
+        $tagRepository = $entityManager->getRepository(Tag::class);
         $produits = $produitRepository->findAll();
         $categories = $categoryRepository->findAll();
+        $tags = $tagRepository->findAll();
         return $this->render('index/index.html.twig', [
             'produits' => $produits,
             'categories' => $categories,
+            "tags" => $tags,
         ]);
     }
 
@@ -37,8 +41,10 @@ class IndexController extends AbstractController
         //Nous récupérons le Repository de l'Entity dont nous avions besoin, laquelle est Category
         $entityManager = $this->getDoctrine()->getManager();
         $categoryRepository = $entityManager->getRepository(Category::class);
+        $tagRepository = $entityManager->getRepository(Tag::class);
         //Nous récupérons la liste des catégories via le Repository afin d'afficher la liste dans la navbar
         $categories = $categoryRepository->findAll();
+        $tags = $tagRepository->findAll();
         //Nous récupérons la Category dont le nom correspond à la valeur de la variable $categoryName
         //La fonction findOneByName nous permet de récupérer UNE entrée dont le nom correspond à la valeur de l'attribut désigné: ici "name"
         $selectedCategory = $categoryRepository->findOneByName($categoryName);
@@ -53,7 +59,30 @@ class IndexController extends AbstractController
         //Nous transmettons nos variables à Twig
         return $this->render('index/index.html.twig', [
             "produits" => $produits,
+            "tags" => $tags,
             'categories' => $categories
+        ]);
+    }
+
+    /**
+     * @Route("/tag/display/{tagId}",name="index_tag")
+     */
+    public function indexTag(Request $request, $tagId)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $tagRepository = $entityManager->getRepository(Tag::class);
+        $categoryRepository = $entityManager->getRepository(Category::class);
+        $tags = $tagRepository->findAll();
+        $categories = $categoryRepository->findAll();
+        $selectedTag = $tagRepository->find($tagId);
+        if (!$selectedTag) {
+            return $this->redirect($this->generateUrl('index'));
+        }
+        $produits = $selectedTag->getProduits();
+        return $this->render('index/index.html.twig', [
+            "tags" => $tags,
+            "categories" => $categories,
+            "produits" => $produits
         ]);
     }
 

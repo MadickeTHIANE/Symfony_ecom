@@ -78,6 +78,8 @@ class Produit
                     return 'placeholder_chaise.jpg';
                 case 'lit':
                     return 'placeholder_lit.jpg';
+                case 'table':
+                    return 'placeholder_table.jpg';
                 default:
                     return 'placeholder_none.jpg';
             }
