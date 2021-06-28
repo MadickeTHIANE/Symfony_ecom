@@ -96,7 +96,7 @@ class Commande
      */
     public function getReservations(): Collection
     {
-        return $this->reservation;
+        return $this->reservations;
     }
 
 

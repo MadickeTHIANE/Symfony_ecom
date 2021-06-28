@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Commande;
+use App\Entity\Reservation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -33,12 +34,20 @@ class ClientController extends AbstractController
     {
         $entityManager = $this->getDoctrine()->getManager();
         $commandeRepository = $entityManager->getRepository(Commande::class);
+        $reservationRepository = $entityManager->getRepository(Reservation::class);
+
         $commandes = $commandeRepository->findAll();
+        $reservations = $reservationRepository->findAll();
         $selectedCommande = $commandeRepository->find($commandId);
+
         if (!$selectedCommande->getStatut() == "Panier") {
             return $this->redirect($this->generateUrl('client_dashboard'));
         }
+
         $selectedCommande->setStatut("Validée");
-        return $this->render('client/client-dashboard.html.twig', ['commandes' => $commandes,]);
+        return $this->render('client/client-dashboard.html.twig', [
+            'commandes' => $commandes,
+            'reservations' => $reservations,
+        ]);
     }
 }

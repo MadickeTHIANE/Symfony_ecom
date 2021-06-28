@@ -74,9 +74,9 @@ class Reservation
     }
 
     /**
-     * @return Collection|Produit[]
+     * @return Produit
      */
-    public function getProduit(): Collection
+    public function getProduit(): Produit
     {
         return $this->produit;
     }
