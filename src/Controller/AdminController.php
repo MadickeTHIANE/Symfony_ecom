@@ -60,50 +60,72 @@ class AdminController extends AbstractController
      */
     public function createProduct(Request $request)
     {
-        $error = "";
+        //Nous récupérons l'Entity Manager afin de préparer l'envoi du Produit à créer
         $entityManager = $this->getDoctrine()->getManager();
         $produitRepository = $entityManager->getRepository(Produit::class);
 
-        $product = new Produit;
-        $productForm = $this->createForm(ProduitType::class, $product);
-        $productForm->handleRequest($request);
-        $produitBDD = $produitRepository->findByName($product->getName());
-        if ($request->isMethod('post') && $productForm->isValid()) {
-            if ($produitBDD) {
-                $error = "Ce produit est déjà existant";
-            } else {
-                $entityManager->persist($product);
-                $entityManager->flush();
+        //Nous créons un Produit vide prêt à l'emploi et nous le lions à notre ProduitType
+        $produit = new Produit;
+        $produitForm = $this->createForm(ProduitType::class, $produit);
+
+        //Nous récupérons les informations de la requête utilisateur pour notre formulaire
+        $produitForm->handleRequest($request);
+
+        //Une fois le Produit validé, nous procédons à sa mise en ligne dans la BDD avant de revenir à l'index
+        if ($request->isMethod('post') && $produitForm->isValid()) {
+            //Si le nom choisi pour notre Entity est déjà existant, nous ne persistons pas la requête et quittons immédiatement la fonction
+            $produitName = $produitRepository->findOneByName($produit->getName());
+            if ($produitName) {
                 return $this->redirect($this->generateUrl('admin_dashboard'));
             }
+            //Persistance et application de la requête
+            $entityManager->persist($produit);
+            $entityManager->flush();
+            return $this->redirect($this->generateUrl('index'));
         }
 
-        return $this->render('admin/dataform.html.twig', [
-            'dataForm' => $productForm->createView(),
-            'erreur' => $error,
-            'formName' => 'Création d\'un produit'
-
+        //Nous envoyons notre produit dans le fichier Twig approprié
+        return $this->render('index/dataform.html.twig', [
+            'dataForm' => $produitForm->createView(),
+            'formName' => 'Création de Produit',
         ]);
     }
 
     /**
      * @Route("/edit/product/{produitId}",name="edit_product")
      */
-    public function editProduct(Request $request, $produitId)
+    public function updateProduit(Request $request, $produitId = false)
     {
+        //Cette fonction a pour but de modifier un produit enregistré dans notre BDD
+        //Elle récupère pour ce but le produit dont l'ID est indiqué et l'intègre à un formulaire
+        //Nous faisons donc appel à l'Entity Manager et au Repository pertinent
         $entityManager = $this->getDoctrine()->getManager();
-        $productRepository = $entityManager->getRepository(Produit::class);
-        $produit = $productRepository->find($produitId);
+        $produitRepository = $entityManager->getRepository(Produit::class);
+        //Nous recherchons le Produit dont l'ID est indiqué. Le cas échéant, nous revenons vers l'index
+        $produit = $produitRepository->find($produitId);
+        if (!$produit) {
+            return $this->redirect($this->generateUrl('index'));
+        }
+        //Une fois le produit récupéré, nous créons un nouveau formulaire ProduitType auquel il sera lié
         $produitForm = $this->createForm(ProduitType::class, $produit);
+        //Nous transmettons les valeurs de $request à notre produit
+        //Si le formulaire est rempli et validé, nous le transmettons à notre base de données
         $produitForm->handleRequest($request);
         if ($request->isMethod('post') && $produitForm->isValid()) {
+            //Si le nom choisi pour notre Entity est déjà existant, nous ne persistons pas la requête et quittons immédiatement la fonction
+            $produitName = $produitRepository->findOneByName($produit->getName());
+            if ($produitName) {
+                return $this->redirect($this->generateUrl('admin_dashboard'));
+            }
+            //Persistance et application de la requête
             $entityManager->persist($produit);
             $entityManager->flush();
-            return $this->redirect($this->generateUrl('admin_dashboard'));
+            return $this->redirect($this->generateUrl('index'));
         }
-        return $this->render('admin/dataform.html.twig', [
-            "dataForm" => $produitForm->createView(),
-            "formName" => "Modification d'un produit"
+        //Nous requérons un render du template dataform.html.twig
+        return $this->render('index/dataform.html.twig', [
+            'formName' => "Modification de Produit",
+            'dataForm' => $produitForm->createView(),
         ]);
     }
 
@@ -112,18 +134,34 @@ class AdminController extends AbstractController
      */
     public function createCategory(Request $request)
     {
+        //Nous récupérons l'Entity Manager afin de préparer l'envoi du Category à créer
         $entityManager = $this->getDoctrine()->getManager();
+        $categoryRepository = $entityManager->getRepository(Category::class);
+
+        //Nous créons une Category vide prêt à l'emploi et nous le lions à notre CategoryType
         $category = new Category;
         $categoryForm = $this->createForm(CategoryType::class, $category);
+
+        //Nous récupérons les informations de la requête utilisateur pour notre formulaire
         $categoryForm->handleRequest($request);
+
+        //Une fois le Category validé, nous procédons à sa mise en ligne dans la BDD avant de revenir à l'index
         if ($request->isMethod('post') && $categoryForm->isValid()) {
+            //Si le nom choisi pour notre Entity est déjà existant, nous ne persistons pas la requête et quittons immédiatement la fonction
+            $categoryName = $categoryRepository->findOneByName($category->getName());
+            if ($categoryName) {
+                return $this->redirect($this->generateUrl('admin_dashboard'));
+            }
+            //Persistance et application de la requête
             $entityManager->persist($category);
             $entityManager->flush();
             return $this->redirect($this->generateUrl('admin_dashboard'));
         }
-        return $this->render('admin/dataform.html.twig', [
-            "formName" => "Création d'une catégorie",
-            "dataForm" => $categoryForm->createView(),
+
+        //Nous envoyons notre category dans le fichier Twig approprié
+        return $this->render('index/dataform.html.twig', [
+            'dataForm' => $categoryForm->createView(),
+            'formName' => 'Création de Category',
         ]);
     }
 
@@ -132,19 +170,36 @@ class AdminController extends AbstractController
      */
     public function editCategory(Request $request, $categoryId)
     {
+        //Cette fonction a pour but de modifier une category enregistré dans notre BDD
+        //Elle récupère pour ce but le category dont l'ID est indiqué et l'intègre à une formulaire
+        //Nous faisons donc appel à l'Entity Manager et au Repository pertinent
         $entityManager = $this->getDoctrine()->getManager();
-        $productRepository = $entityManager->getRepository(category::class);
-        $category = $productRepository->find($categoryId);
+        $categoryRepository = $entityManager->getRepository(Category::class);
+        //Nous recherchons le Category dont l'ID est indiqué. Le cas échéant, nous revenons vers l'index
+        $category = $categoryRepository->find($categoryId);
+        if (!$category) {
+            return $this->redirect($this->generateUrl('admin_dashboard'));
+        }
+        //Une fois le category récupéré, nous créons une nouveau formulaire CategoryType auquel il sera lié
         $categoryForm = $this->createForm(CategoryType::class, $category);
+        //Nous transmettons les valeurs de $request à notre category
+        //Si le formulaire est rempli et validé, nous le transmettons à notre base de données
         $categoryForm->handleRequest($request);
         if ($request->isMethod('post') && $categoryForm->isValid()) {
+            //Si le nom choisi pour notre Entity est déjà existant, nous ne persistons pas la requête et quittons immédiatement la fonction
+            $categoryName = $categoryRepository->findOneByName($category->getName());
+            if ($categoryName) {
+                return $this->redirect($this->generateUrl('admin_dashboard'));
+            }
+            //Persistance et application de la requête
             $entityManager->persist($category);
             $entityManager->flush();
             return $this->redirect($this->generateUrl('admin_dashboard'));
         }
-        return $this->render('admin/dataform.html.twig', [
-            "dataForm" => $categoryForm->createView(),
-            "formName" => "Modification d'une categorie"
+        //Nous requérons une render du template dataform.html.twig
+        return $this->render('index/dataform.html.twig', [
+            'formName' => "Modification de Category",
+            'dataForm' => $categoryForm->createView(),
         ]);
     }
 
@@ -174,21 +229,31 @@ class AdminController extends AbstractController
      */
     public function createTag(Request $request)
     {
+        //Cette fonction a pour but d'afficher le formulaire de création de Tags
+        //Pour communiquer avec notre BDD, nous avons besoin de l'Entity Manager
         $entityManager = $this->getDoctrine()->getManager();
+        $tagRepository = $entityManager->getRepository(Tag::class);
+        //Nous créons un nouveau Tag et nous le lions au formulaire à créer
         $tag = new Tag;
         $tagForm = $this->createForm(TagType::class, $tag);
+        //Nous transmettons la requête au formulaire avant de vérifier sa validité
+        //Nous renvoyons ensuite l'utilisateur vers la liste des Tags afin qu'il puisse constater l'ajout
         $tagForm->handleRequest($request);
         if ($request->isMethod('post') && $tagForm->isValid()) {
-            foreach ($tag->getProduits() as $produit) {
-                $entityManager->persist($produit);
+            //Si le nom choisi pour notre Entity est déjà existant, nous ne persistons pas la requête et quittons immédiatement la fonction
+            $tagName = $tagRepository->findOneByName($tag->getName());
+            if ($tagName) {
+                return $this->redirect($this->generateUrl('admin_dashboard'));
             }
+            //Persistance et application de la requête
             $entityManager->persist($tag);
             $entityManager->flush();
             return $this->redirect($this->generateUrl('admin_dashboard'));
         }
-        return $this->render('admin/dataform.html.twig', [
-            "formName" => "Création d'un tag",
-            "dataForm" => $tagForm->createView(),
+        //Nous transmettons notre nouveau formulaire à dataform.html.twig
+        return $this->render('index/dataform.html.twig', [
+            'dataForm' => $tagForm->createView(),
+            'formName' => 'Création de Tags'
         ]);
     }
 

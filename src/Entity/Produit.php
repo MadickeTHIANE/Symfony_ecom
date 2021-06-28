@@ -56,9 +56,15 @@ class Produit
      */
     private $category;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Reservation::class, mappedBy="produit")
+     */
+    private $reservations;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
     }
 
     public function getPlaceholder()
@@ -181,5 +187,39 @@ class Produit
     public function getTags(): Collection
     {
         return $this->tags;
+    }
+
+    public function getReservations(): ?Reservation
+    {
+        return $this->reservations;
+    }
+
+    public function setReservations(?Reservation $reservation): self
+    {
+        $this->reservations = $reservation;
+
+        return $this;
+    }
+
+    public function addReservation(Reservation $reservation): self
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations[] = $reservation;
+            $reservation->setProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): self
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            // set the owning side to null (unless already changed)
+            if ($reservation->getProduit() === $this) {
+                $reservation->setProduit(null);
+            }
+        }
+
+        return $this;
     }
 }

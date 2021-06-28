@@ -19,14 +19,14 @@ class TagType extends AbstractType
             ->add('name', TextType::class, [
                 'label' => 'Nom'
             ])
-            ->add('produits', EntityType::class, [
-                "label" => "Produits",
-                "choice_label" => "name",
-                "class" => Produit::class,
-                "expanded" => true,
-                "multiple" => true //* Dans le cas de Many
-                // "required" => false
-            ])
+            // ->add('produits', EntityType::class, [
+            //     "label" => "Produits",
+            //     "choice_label" => "name",
+            //     "class" => Produit::class,
+            //     "expanded" => true,
+            //     "multiple" => true //* Dans le cas de Many
+            //     // "required" => false
+            // ])
             ->add('valider', SubmitType::class, [
                 'label' => 'Valider',
                 'attr' => [

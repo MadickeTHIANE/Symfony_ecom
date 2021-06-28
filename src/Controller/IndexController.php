@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Tag;
 use App\Entity\Produit;
 use App\Entity\Category;
+use App\Entity\Commande;
+use App\Entity\Reservation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -117,12 +119,37 @@ class IndexController extends AbstractController
     {
         $entityManager = $this->getDoctrine()->getManager();
         $produitRepository = $entityManager->getRepository(Produit::class);
+        $commandeRepository = $entityManager->getRepository(Commande::class);
         $produit = $produitRepository->find($produitId);
-        if ($produit->getStock() >= 1) {
-            $produit->setStock($produit->getStock() - 1);
+        //Si le produit n'est pas trouvé, nous retournons vers la page d'accueil
+        if (!$produit) {
+            return $this->redirect($this->generateUrl('index'));
+        }
+        //Si le produit existe et si son stock est supérieur à zero, nous créons une nouvelle Reservation
+        $produitStock = $produit->getStock();
+        if ($produitStock > 0) {
+
+            $reservation = new Reservation;
+            $reservation->setProduit($produit);
+            //Nous vérifions si une Commande est en cours, sinon nous la créons.
+            $commande = $commandeRepository->findOneByStatut('Panier');
+            if (!$commande) {
+                $commande = new Commande('Panier', [$reservation]);
+                $commande->setAdresse('null');
+            } else {
+                //Nous lui transmettons ensuite notre nouvelle Reservation
+                $commande->addReservation($reservation);
+            }
+            //Nous déterminons la Quantity de notre Reservation avant de l'enregistrer dans une variable
+            $reservationQuantity = $reservation->setQuantity(1)->getQuantity();
+            //Notre nouveau stock pour Produit correspond à la différence du stock de Produit et de la quantity de Reservation
+            $produit->setStock($produitStock - $reservationQuantity);
             $entityManager->persist($produit);
+            $entityManager->persist($commande);
+            $entityManager->persist($reservation);
             $entityManager->flush();
-            $display = ($produit->getStock() == 0) ? "none" : "block";
+
+            $display = ($produitStock == 0) ? "none" : "block";
             return $this->render('index/fiche-produit.html.twig', [
                 "produit" => $produit,
                 "display" => $display

@@ -67,3 +67,16 @@ Ne pas oublier de créer un lien hypertexte sur index.html.twig liant toute vign
 Créer une fonction nommée buyProduit(), laquelle est appelée lorsque nous cliquons sur le bouton "Acheter"
 La fonction buyProduit n'a pour l'instant qu'un effet, qui est de décrémenter le stock du Produit visé par 1.
 Si le stock est à zéro, la décrémentation ne doit pas être possible et le bouton "Acheter" ne doit plus être affiché.
+========================================================================================================================================================================================================================================================================================================================================================
+Nos nouvelles Entity:
+
+Reservation
+	- A pour but de conserver une trace de la référence produit désirée
+	- Conserve la quantité demandé et la date de la demande
+	- Deux attributs: quantity (Integer) et creationDate (DateTime)
+	- Deux Entity liées: Commande (ManyToOne) et Produit (OneToMany)
+
+Commande
+	- A pour but de réunir toutes les Réservations de référence produit en un tout cohérent
+	- Trois attributs: adresse (Text), statut (String), creationDate (DateTime)
+	- Une Entity liée: Reservation (OneToMany)
