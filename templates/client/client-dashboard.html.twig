@@ -4,34 +4,42 @@
 {% endblock %}
 {% block body %}
 
-	<div class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="dashboard">
-		<h1 class="w3-wide">TABLEAU DE BORD</h1>
+	<div
+		class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="dashboard">
+		{# <h1 class="w3-wide">TABLEAU DE BORD</h1>
+																								
+																										<a href="{{ path('create_product') }}">
+																											<button class="w3-button w3-black w3-margin-bottom">Créer un Produit</button>
+																										</a>
+																										<a href="{{ path('create_category') }}">
+																											<button class="w3-button w3-black w3-margin-bottom">Créer une Catégorie</button>
+																										</a>
+																										<a href="{{ path('create_tag') }}">
+																											<button class="w3-button w3-black w3-margin-bottom">Créer un Tag</button>
+																										</a> #}
+		<h3 class="w3-wide w3-border-white w3-white">Votre commande</h3>
 
-		<a href="{{ path('create_product') }}">
-			<button class="w3-button w3-black w3-margin-bottom">Créer un Produit</button>
-		</a>
-		<a href="{{ path('create_category') }}">
-			<button class="w3-button w3-black w3-margin-bottom">Créer une Catégorie</button>
-		</a>
-		<a href="{{ path('create_tag') }}">
-			<button class="w3-button w3-black w3-margin-bottom">Créer un Tag</button>
-		</a>
-		<h3 class="w3-wide w3-border-white w3-white">Liste des Produits</h3>
-
-		<ul class="w3-ul w3-border-white w3-white">
-			{% for produit in produits %}
-				<li class="w3-padding">{{ produit.name }}
-					<div>
-						<a href="{{ path('edit_product',{'produitId':produit.id})}}">
-							<button class="w3-button w3-yellow w3-margin-bottom">Modifier</button>
-						</a>
-						<a href="{{ path('delete_product',{'produitId':produit.id}) }}">
-							<button class="w3-button w3-red w3-margin-bottom">Supprimer</button>
-						</a>
-					</div>
-				</li>
-			{% endfor %}
-		</ul>
+		<table class="table mt-5">
+			<thead>
+				<tr>
+					<th scope="col">Numéro</th>
+					<th scope="col">Adresse</th>
+					<th scope="col">Statut</th>
+					<th scope="col">Date de commande</th>
+					<th scope="col">Réservations</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for commande in commandes %}
+					<tr>
+						<th scope="row">{{ commande.id }}</th>
+						<td>{{ commande.adresse }}</td>
+						<td>{{ commande.statut }}</td>
+						<td>{{ commande.creationDate|date('Le d/m/Y à h:m:s') }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
 
 
 	</div>
