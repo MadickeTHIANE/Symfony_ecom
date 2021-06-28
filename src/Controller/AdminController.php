@@ -107,8 +107,6 @@ class AdminController extends AbstractController
         ]);
     }
 
-
-
     /**
      * @Route("/create/category",name="create_category")
      */
@@ -160,6 +158,11 @@ class AdminController extends AbstractController
         $category = $categoryRepository->find($categoryId);
         if (!$category) {
             return $this->redirect($this->generateUrl('admin_dashboard'));
+        }
+        //Si nous trouvons une category, nous procédons à sa demande de suppression via l'Entity Ma,ager
+        //Nous retirons au préalable tous les Produit associés afin de retirer les contraintes de clef étrangère
+        foreach ($category->getProduits() as $produit) {
+            $category->removeProduit($produit);
         }
         $entityManager->remove($category);
         $entityManager->flush();
