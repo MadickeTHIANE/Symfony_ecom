@@ -63,3 +63,7 @@ fiche-produit.html.twig:
     1/3 -> Affiche le nom du Produit, sa catégorie, son prix, son stock, sa description, ainsi qu'un bouton "Acheter" de class "w3-black"
 Cliquer sur un tag ou une catégorie sur ficheProduit nous ramène vers categoryIndex() ou tagIndex(), lesquels sont des variations de la page d'accueil n'affichant qu'un catalogue centré sur la catégorie ou le tag sélectionné.
 Ne pas oublier de créer un lien hypertexte sur index.html.twig liant toute vignette de Produit publiée à sa fiche Produit.
+========================================================================================================================================================================================================================================================================================================================================================
+Créer une fonction nommée buyProduit(), laquelle est appelée lorsque nous cliquons sur le bouton "Acheter"
+La fonction buyProduit n'a pour l'instant qu'un effet, qui est de décrémenter le stock du Produit visé par 1.
+Si le stock est à zéro, la décrémentation ne doit pas être possible et le bouton "Acheter" ne doit plus être affiché.

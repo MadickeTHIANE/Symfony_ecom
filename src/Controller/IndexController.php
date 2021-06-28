@@ -98,8 +98,40 @@ class IndexController extends AbstractController
             $this->redirect($this->generateUrl('index'));
         }
         $produit = $selectedProduit;
+        if ($produit->getStock() == 0) {
+            return $this->render('index/fiche-produit.html.twig', [
+                "display" => "none",
+                "produit" => $produit
+            ]);
+        }
         return $this->render('index/fiche-produit.html.twig', [
-            "produit" => $produit
+            "produit" => $produit,
+            "display" => "block"
         ]);
+    }
+
+    /**
+     * @Route("/produit/buy/{produitId}",name="buy_produit")
+     */
+    public function buyProduit(Request $request, $produitId)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $produitRepository = $entityManager->getRepository(Produit::class);
+        $produit = $produitRepository->find($produitId);
+        if ($produit->getStock() >= 1) {
+            $produit->setStock($produit->getStock() - 1);
+            $entityManager->persist($produit);
+            $entityManager->flush();
+            $display = ($produit->getStock() == 0) ? "none" : "block";
+            return $this->render('index/fiche-produit.html.twig', [
+                "produit" => $produit,
+                "display" => $display
+            ]);
+        } else {
+            return $this->render('index/fiche-produit.html.twig', [
+                "display" => "none",
+                "produit" => $produit
+            ]);
+        }
     }
 }

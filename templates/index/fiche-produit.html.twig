@@ -34,7 +34,9 @@
 					en stock</li>
 				<li>{{ produit.description }}</li>
 			</ul>
-			<button class="w3 w3-black">Acheter</button>
+			<a style="display : {{ display }};" href="{{ path('buy_produit',{'produitId':produit.id})}}">
+				<button class="w3 w3-black">Acheter</button>
+			</a>
 		</div>
 	</div>
 {% endblock %}

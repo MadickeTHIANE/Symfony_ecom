@@ -60,6 +60,7 @@ class AdminController extends AbstractController
      */
     public function createProduct(Request $request)
     {
+        $error = "";
         $entityManager = $this->getDoctrine()->getManager();
         $produitRepository = $entityManager->getRepository(Produit::class);
 
@@ -67,13 +68,14 @@ class AdminController extends AbstractController
         $productForm = $this->createForm(ProduitType::class, $product);
         $productForm->handleRequest($request);
         $produitBDD = $produitRepository->findByName($product->getName());
-
-        if ($request->isMethod('post') && $productForm->isValid() && !$produitBDD) {
-            $entityManager->persist($product);
-            $entityManager->flush();
-            return $this->redirect($this->generateUrl('admin_dashboard'));
-        } else {
-            $error = "Ce produit est déjà existant";
+        if ($request->isMethod('post') && $productForm->isValid()) {
+            if ($produitBDD) {
+                $error = "Ce produit est déjà existant";
+            } else {
+                $entityManager->persist($product);
+                $entityManager->flush();
+                return $this->redirect($this->generateUrl('admin_dashboard'));
+            }
         }
 
         return $this->render('admin/dataform.html.twig', [
