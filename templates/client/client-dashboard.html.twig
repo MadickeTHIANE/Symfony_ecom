@@ -7,16 +7,16 @@
 	<div
 		class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="dashboard">
 		{# <h1 class="w3-wide">TABLEAU DE BORD</h1>
-																								
-																										<a href="{{ path('create_product') }}">
-																											<button class="w3-button w3-black w3-margin-bottom">Créer un Produit</button>
-																										</a>
-																										<a href="{{ path('create_category') }}">
-																											<button class="w3-button w3-black w3-margin-bottom">Créer une Catégorie</button>
-																										</a>
-																										<a href="{{ path('create_tag') }}">
-																											<button class="w3-button w3-black w3-margin-bottom">Créer un Tag</button>
-																										</a> #}
+																														
+																																<a href="{{ path('create_product') }}">
+																																	<button class="w3-button w3-black w3-margin-bottom">Créer un Produit</button>
+																																</a>
+																																<a href="{{ path('create_category') }}">
+																																	<button class="w3-button w3-black w3-margin-bottom">Créer une Catégorie</button>
+																																</a>
+																																<a href="{{ path('create_tag') }}">
+																																	<button class="w3-button w3-black w3-margin-bottom">Créer un Tag</button>
+																																</a> #}
 		<h3 class="w3-wide w3-border-white w3-white">Votre commande</h3>
 
 		<table class="table mt-5">
@@ -26,7 +26,6 @@
 					<th scope="col">Adresse</th>
 					<th scope="col">Statut</th>
 					<th scope="col">Date de commande</th>
-					<th scope="col">Réservations</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -36,6 +35,11 @@
 						<td>{{ commande.adresse }}</td>
 						<td>{{ commande.statut }}</td>
 						<td>{{ commande.creationDate|date('Le d/m/Y à h:m:s') }}</td>
+						<td>
+							<a href="{{ path('confirm_command',{"commandId":commande.id}) }}">
+								<button class="btn btn-success">Valider</button>
+							</a>
+						</td>
 					</tr>
 				{% endfor %}
 			</tbody>
