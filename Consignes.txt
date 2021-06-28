@@ -80,3 +80,11 @@ Commande
 	- A pour but de réunir toutes les Réservations de référence produit en un tout cohérent
 	- Trois attributs: adresse (Text), statut (String), creationDate (DateTime)
 	- Une Entity liée: Reservation (OneToMany)
+========================================================================================================================================================================================================================================================================================================================================================
+Après avoir créé ClientController, à la manière de notre tableau d'administration, nous allons avoir un backoffice pour les clients, sous le nom de client-dashboard.html.twig, dans le dossier client de notre dossier template.
+
+ClientController doit posséder une méthode offrant un rendu de ce template, nommée clientDashboard(). Cette page web doit proposer:
+	Un tableau de la commande active, ainsi qu'un bouton de validation de la commande: ce bouton doit avoir pour effet de faire passer le statut de la commande active de "Panier" à "Validee". La fonction permettant ce changement de statut ne doit fonctionner que pour les commandes en mode Panier.
+    Chaque tableau de commande doit présenter la liste des Reservations relatives à cette commande. Chaque Reservation de la Commande active doit posséder un bouton rouge de suppression, permettant de supprimer la Reservation. Si la dernière Reservation d'une Commande est supprimée, la Commande doit également être supprimée. A noter qu'il doit être impossible de supprimer les Reservations d'une Commande validée et que le bouton de suppression ne doit pas être visible pour les entrées des Commandes validées.
+        A côté du bouton de validation de la Commande doit coexister un bouton de suppression de la Commande active. Ce bouton a pour effet de supprimer toutes les Reservations de la Commande une par une avant de finir par supprimer la Commande elle-même. Ce bouton ne fonctionne que pour les Commandes en statut "Panier".
+    Toutes les méthodes nécessaires pour l'implémentation de ce backoffice client doivent être écrites dans ClientController.
