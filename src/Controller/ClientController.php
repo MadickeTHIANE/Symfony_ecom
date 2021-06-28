@@ -23,8 +23,14 @@ class ClientController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $commandeRepository = $entityManager->getRepository(Commande::class);
         $commandes = $commandeRepository->findAll();
+
+        foreach ($commandes as $commande) {
+            $displayDeleteBtn[] = ($commande->getStatut() == "Validée") ? "none" : "block";
+        }
+
         return $this->render('client/client-dashboard.html.twig', [
             'commandes' => $commandes,
+            'displayDeleteBtn' => $displayDeleteBtn,
         ]);
     }
 
@@ -46,16 +52,24 @@ class ClientController extends AbstractController
         }
 
         $selectedCommande->setStatut("Validée");
+        $entityManager->persist($selectedCommande);
+        $entityManager->flush();
+
+        foreach ($commandes as $commande) {
+            $displayDeleteBtn[] = ($commande->getStatut() == "Validée") ? "none" : "block";
+        }
+
         return $this->render('client/client-dashboard.html.twig', [
             'commandes' => $commandes,
             'reservations' => $reservations,
+            'displayDeleteBtn' => $displayDeleteBtn
         ]);
     }
 
     /**
-     * @Route("/delete/{commandeId}/{reservationId}",name="delete_reservation")
+     * @Route("/delete//{statut}{commandeId}/{reservationId}",name="delete_reservation")
      */
-    public function deleteReservation(Request $request, $commandeId, $reservationId)
+    public function deleteReservation(Request $request, $statut, $commandeId, $reservationId)
     {
         $entityManager = $this->getDoctrine()->getManager();
 
@@ -65,6 +79,7 @@ class ClientController extends AbstractController
 
         $produits = $produitRepository->findAll();
         $reservations = $reservationRepository->findAll();
+        $commandes = $commandeRepository->findAll();
         $commande = $commandeRepository->find($commandeId);
         $selectedReservation = $reservationRepository->find($reservationId);
 
@@ -73,7 +88,7 @@ class ClientController extends AbstractController
         // $produit = $selectedReservation->getProduit();
         // $statut = $produit->getStatut();
 
-        if (!$selectedReservation /*|| $statut == "Validée"*/) {
+        if (!$selectedReservation || $statut == "Validée") {
             return $this->redirect($this->generateUrl('client_dashboard'));
         }
 
@@ -85,11 +100,15 @@ class ClientController extends AbstractController
         if (count($reservations) == 1) { //? pourquoi je dois le mettre à 1 ? pas actualisé ?
             $entityManager->remove($commande);
             $entityManager->flush();
-            //Effacer le bouton Valider
+        }
+
+        foreach ($commandes as $commande) {
+            $displayDeleteBtn[] = ($commande->getStatut() == "Validée") ? "none" : "block";
         }
 
         return $this->render('index/index.html.twig', [
             "produits" => $produits,
+            "displayDeleteBtn" => $displayDeleteBtn,
         ]);
     }
 }
