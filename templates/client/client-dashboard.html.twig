@@ -3,93 +3,88 @@
 	Client{{ parent() }}
 {% endblock %}
 {% block body %}
-
-	<div class="container-fluid p-5">
-		{% if commandeAttente is not null %}
-			<h3>Vos commandes en cours</h3>
-			<div class="container">
-
-				<table class="table mt-5">
-					<thead>
-						<tr>
-							<th scope="col">Numéro de commande</th>
-							<th scope="col">Adresse</th>
-							<th scope="col">Date de commande</th>
-							<th scope="col">Produit</th>
-							<th scope="col">Prix</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<th scope="row">{{ commandeAttente.id }}</th>
-							<td>{{ commandeAttente.adresse }}</td>
-							<td>{{ commandeAttente.creationDate|date('Le d/m/Y à h:i:s') }}</td>
-							{% for reservation in commandeAttente.reservations %}
-								<tr>
-									<td colspan="3"></td>
-									<td>{{ reservation.produit.name }}</td>
-									<td>{{ reservation.produit.price }}</td>
-								</tr>
-								<tr>
-									<td colspan="3"></td>
-									<td colspan="2">
-										<a href="{{ path('delete_reservation',{"reservationId" : reservation.id}) }}">
-											<button class="btn btn-danger">Supprimer</button>
-										</a>
-									</td>
-								</tr>
-							{% endfor %}
-						</tr>
-					</tbody>
-				</table>
-				<a href="{{ path('confirm_command',{"commandId":commandeAttente.id}) }}">
-					<button class="btn btn-success">Valider</button>
-				</a>
-				<a href="{{ path('cancel_command',{"commandId":commandeAttente.id}) }}">
-					<button class="btn btn-success">Supprimer</button>
-				</a>
-
-			{% endif %}
-
-
+	<div class="w3-container w3-content w3-padding-64" style="max-width:800px" id="dashboard">
+		<div class="w3-center">
+			<h1 class="w3-wide">TABLEAU DE BORD</h1>
 		</div>
-		{% if commandesValid is not empty %}
-			<h3 class="my-5">Vos commandes validées</h3>
-			<div class="container">
 
-				<table class="table mt-5">
-					<thead>
-						<tr>
-							<th scope="col">Numéro de commande</th>
-							<th scope="col">Adresse</th>
-							{# <th scope="col">Statut</th> #}
-							<th scope="col">Date de commande</th>
-							<th scope="col">Produit</th>
-							<th scope="col">Prix</th>
+		<h3 class="w3-wide w3-center">Liste des Commandes</h3>
+
+		{% if activeCommande is not null %}
+			<table class="w3-table-all" style="margin-bottom:100px; margin-top:50px;">
+				<tr class="w3-padding">
+					<th>Commande Active</th>
+					<th>Commande prise le
+						{{ activeCommande.creationDate|date('d/m/Y à G:i:s', 'Europe/Paris') }}</th>
+					<th>Prix total :
+						{{ activeCommande.totalPrice }}
+					</th>
+					<th>
+						<a href="{{ path('commande_validate',{"commandeId":activeCommande.id}) }}">
+							<button class="w3-button w3-blue-gray" style="float:right;">Valider</button>
+						</a>
+					</th>
+				</tr>
+				<tr class="w3-padding">
+					<th>Nom du Produit</th>
+					<th>Prix</th>
+					<th>Quantité</th>
+				</tr>
+				{% for reservation in activeCommande.reservations %}
+					<tr class="w3-padding">
+						<th>{{ reservation.produit.name }}</th>
+						<th>{{ reservation.produit.price }}€</th>
+						<th>{{ reservation.quantity }}</th>
+						<th>
+							<a href="{{ path('reservation_delete',{"reservationId":reservation.id}) }}">
+								<button class="w3-button w3-red" style="float:right;">Supprimer</button>
+							</a>
+						</th>
+					</tr>
+				{% endfor %}
+				<tr class="w3-padding">
+					<th>
+						<a href="{{ path('commande_delete',{"commandeId":activeCommande.id}) }}">
+							<button class="w3-button w3-red" style="float:right;">Supprimer la commande</button>
+						</a>
+					</th>
+				</tr>
+			</table>
+		{% else %}
+			<p>
+				<b>Vous n'avez pas de commande en cours.</b>
+			</p>
+		{% endif %}
+
+		<h3 class="w3-wide w3-center">Commandes Validées</h3>
+		{% if commandes is not empty %}
+			{% for commande in commandes %}
+				<table class="w3-table-all" style="margin-bottom:100px;">
+					<tr class="w3-padding">
+						<th>Commande Validée</th>
+						<th>Commande prise le
+							{{ commande.creationDate|date('d/m/Y à G:i:s', 'Europe/Paris') }}</th>
+						<th>Prix total :
+							{{ commande.totalPrice }}</th>
+					</tr>
+					<tr class="w3-padding">
+						<th>Nom du Produit</th>
+						<th>Prix</th>
+						<th>Quantité</th>
+					</tr>
+					{% for reservation in commande.reservations %}
+						<tr class="w3-padding">
+							<th>{{ reservation.produit.name }}</th>
+							<th>{{ reservation.produit.price }}€</th>
+							<th>{{ reservation.quantity }}</th>
 						</tr>
-					</thead>
-					<tbody>
-						{# {% set i = 0 %} #}
-						{% for commande in commandesValid %}
-							<tr>
-								<th scope="row">{{ commande.id }}</th>
-								<td>{{ commande.adresse }}</td>
-								{# <td>{{ commande.statut }}</td> #}
-								<td>{{ commande.creationDate|date('Le d/m/Y à h:i:s') }}</td>
-								{% for reservation in commande.reservations %}
-									<td>{{ reservation.produit.name }}</td>
-									<td>{{ reservation.produit.price }}€</td>
-
-								{% endfor %}
-								{# {% set i = i + 1 %} #}
-
-							</tr>
-						{% endfor %}
-					</tbody>
+					{% endfor %}
 				</table>
-
-
-			</div>
+			{% endfor %}
+		{% else %}
+			<p>
+				<b>Votre historique est vide pour l'instant.</b>
+			</p>
 		{% endif %}
 	</div>
 {% endblock %}

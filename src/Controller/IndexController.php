@@ -95,7 +95,9 @@ class IndexController extends AbstractController
     {
         $entityManager = $this->getDoctrine()->getManager();
         $produitRepository = $entityManager->getRepository(Produit::class);
+        $categoryRepository = $entityManager->getRepository(Category::class);
         $selectedProduit = $produitRepository->find($produitId);
+        $categories = $categoryRepository->findAll();
         if (!$selectedProduit) {
             $this->redirect($this->generateUrl('index'));
         }
@@ -108,6 +110,7 @@ class IndexController extends AbstractController
         }
         return $this->render('index/fiche-produit.html.twig', [
             "produit" => $produit,
+            "categories" => $categories,
             "display" => "block"
         ]);
     }

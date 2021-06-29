@@ -121,4 +121,13 @@ class Commande
 
         return $this;
     }
+
+    public function getTotalPrice()
+    {
+        $totalPrice = 0;
+        foreach ($this->reservations as $reservation) {
+            $totalPrice += $reservation->getProduit()->getPrice() * $reservation->getQuantity();
+        }
+        return $totalPrice;
+    }
 }

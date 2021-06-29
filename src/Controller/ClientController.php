@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Produit;
+use App\Entity\Category;
 use App\Entity\Commande;
 use App\Entity\Reservation;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,119 +12,122 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
- * @Route("/client")
+ * @Route("/user")
  */
 class ClientController extends AbstractController
 {
     /**
-     * @Route("/", name="client_dashboard")
+     * @Route("/dashboard", name="client_dashboard")
      */
     public function clientDashboard(): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
         $commandeRepository = $entityManager->getRepository(Commande::class);
-        $commandeAttente = $commandeRepository->findOneByStatut("Panier");
-        $commandesValid = $commandeRepository->findByStatut("Validée");
+        //Nous récupérons la liste des Category pour notre navbar
+        $categoryRepository = $entityManager->getRepository(Category::class);
+        $categories = $categoryRepository->findAll();
+        //Nous récupérons dans le cadre de deux recherches, la liste des Commande validées et la commande en mode Panier
+        $activeCommande = $commandeRepository->findOneByStatut("Panier");
+        $commandes = $commandeRepository->findByStatut("Validée");
 
         return $this->render('client/client-dashboard.html.twig', [
-            'commandeAttente' => $commandeAttente,
-            'commandesValid' => $commandesValid
+            'activeCommande' => $activeCommande,
+            'commandes' => $commandes,
+            'categories' => $categories
         ]);
     }
 
     /**
-     * @Route("/valid/{commandId}",name="confirm_command")
+     * @Route("/commande/validate/{commandeId}",name="commande_validate")
      */
-    public function confirmCommand(Request $request, $commandId)
+    public function confirmCommand(Request $request, $commandeId)
     {
         $entityManager = $this->getDoctrine()->getManager();
         $commandeRepository = $entityManager->getRepository(Commande::class);
 
-        $commandeAttente = $commandeRepository->findOneByStatut("Panier");
-        $commandesValid = $commandeRepository->findByStatut("Validée");
-        $selectedCommande = $commandeRepository->find($commandId);
+        $activeCommande = $commandeRepository->findOneByStatut("Panier");
+        $commandes = $commandeRepository->findByStatut("Validée");
 
-        if (!$selectedCommande->getStatut() == "Panier") {
+        //Nous recherchons la Commande dont l'ID correspond à la valeur transmise via l'url
+        //Le cas échéant, nous retournons à notre tableau de bord
+        //Si le statut de notre commande n'est pas "Panier", nous retournons également au tableau de bord
+        //Nous plaçons la condition d'existence de la Commande en premier dans notre structure de contrôle afin d'éviter de faire appel à une méthode getStatus sur une variable null
+        $commande = $commandeRepository->find($commandeId);
+        if (!$commande || !$commande->getStatut() == "Panier") {
             return $this->redirect($this->generateUrl('client_dashboard'));
         }
 
-        $selectedCommande->setStatut("Validée");
-        $entityManager->persist($selectedCommande);
+        $commande->setStatut("Validée");
+        $entityManager->persist($commande);
         $entityManager->flush();
 
 
-        return $this->render('client/client-dashboard.html.twig', [
-            'commandeAttente' => $commandeAttente,
-            'commandesValid' => $commandesValid
-        ]);
+        return $this->redirect($this->generateUrl('client_dashboard'));
     }
 
     /**
-     * @Route("/cancel/{commandId}",name="cancel_command")
+     * @Route("/cancel/{commandeId}",name="commande_delete")
      */
-    public function cancelCommand(Request $request, $commandId)
+    public function deleteCommand(Request $request, $commandeId)
     {
         $entityManager = $this->getDoctrine()->getManager();
         $commandeRepository = $entityManager->getRepository(Commande::class);
 
-        $commandeAttente = $commandeRepository->findOneByStatut("Panier");
-        $commandesValid = $commandeRepository->findByStatut("Validée");
-        $selectedCommande = $commandeRepository->find($commandId);
+        $commande = $commandeRepository->find($commandeId);
 
-        if (!$selectedCommande->getStatut() == "Panier") {
+        if (!$commande || (!$commande->getStatut() == "Panier")) {
             return $this->redirect($this->generateUrl('client_dashboard'));
         }
 
-        $reservations = $selectedCommande->getReservations();
+        $reservations = $commande->getReservations();
         foreach ($reservations as $reservation) {
+            //Avant de procéder à la suppression, nous restituon à la référence Produit la quantity réservée
+            $produit = $reservation->getProduit();
+            $produit->setStock($produit->getStock() + $reservation->getQuantity());
+            $entityManager->persist($produit);
             $entityManager->remove($reservation);
         }
 
-        $entityManager->remove($selectedCommande);
+        $entityManager->remove($commande);
         $entityManager->flush();
 
 
-        return $this->render('client/client-dashboard.html.twig', [
-            'commandeAttente' => $commandeAttente,
-            'commandesValid' => $commandesValid
-        ]);
+        return $this->redirect($this->generateUrl('client_dashboard'));
     }
 
     /**
-     * @Route("/delete/{reservationId}",name="delete_reservation")
+     * @Route("/reservation/delete/{reservationId}",name="reservation_delete")
      */
     public function deleteReservation(Request $request, $reservationId)
     {
         $entityManager = $this->getDoctrine()->getManager();
 
         $reservationRepository = $entityManager->getRepository(Reservation::class);
-        $produitRepository = $entityManager->getRepository(Produit::class);
-        $commandeRepository = $entityManager->getRepository(Commande::class);
 
-        $commandeAttente = $commandeRepository->findOneByStatut("Panier");
-        $commandesValid = $commandeRepository->findByStatut("Validée");
-        $selectedReservation = $reservationRepository->find($reservationId);
-        $commande = $selectedReservation->getCommande();
+        $reservation = $reservationRepository->find($reservationId);
+        $commande = $reservation->getCommande();
         $statut = $commande->getStatut();
 
-        if (!$selectedReservation || $statut == "Validée") {
+        if (!$reservation || $statut != "Panier") {
             return $this->redirect($this->generateUrl('client_dashboard'));
         }
 
+        //Si notre Reservation est existante et valide, nous procédons à sa suppression
+        //Avant de procéder à la suppression, nous restituon à la référence Produit la quantity réservée
+        $produit = $reservation->getProduit();
+        $produit->setStock($produit->getStock() + $reservation->getQuantity());
+        $entityManager->persist($produit);
 
-        $entityManager->remove($selectedReservation);
+        $entityManager->remove($reservation);
         $entityManager->flush();
 
-        //La commande est supprimée si la dernière réservation a été supprimée, soit si la table Reservation est nulle
+        //Nous vérifions à présent si la Commande possédant la Reservation est à présent vide. Si oui, nous procédons également à sa suppression
         $reservations = $commande->getReservations();
         if (count($reservations) == 0) {
             $entityManager->remove($commande);
             $entityManager->flush();
         }
 
-        return $this->render('client/client-dashboard.html.twig', [
-            'commandeAttente' => $commandeAttente,
-            'commandesValid' => $commandesValid
-        ]);
+        return $this->redirect($this->generateUrl('client_dashboard'));
     }
 }
