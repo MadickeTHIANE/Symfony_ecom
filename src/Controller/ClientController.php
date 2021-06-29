@@ -44,8 +44,8 @@ class ClientController extends AbstractController
         $reservationRepository = $entityManager->getRepository(Reservation::class);
 
         $commandes = $commandeRepository->findAll();
-        $reservations = $reservationRepository->findAll();
         $selectedCommande = $commandeRepository->find($commandId);
+        $reservations = $selectedCommande->getReservations();
 
         if (!$selectedCommande->getStatut() == "Panier") {
             return $this->redirect($this->generateUrl('client_dashboard'));
@@ -67,9 +67,9 @@ class ClientController extends AbstractController
     }
 
     /**
-     * @Route("/delete//{statut}{commandeId}/{reservationId}",name="delete_reservation")
+     * @Route("/delete/{reservationId}",name="delete_reservation")
      */
-    public function deleteReservation(Request $request, $statut, $commandeId, $reservationId)
+    public function deleteReservation(Request $request, $reservationId)
     {
         $entityManager = $this->getDoctrine()->getManager();
 
@@ -80,8 +80,9 @@ class ClientController extends AbstractController
         $produits = $produitRepository->findAll();
         $reservations = $reservationRepository->findAll();
         $commandes = $commandeRepository->findAll();
-        $commande = $commandeRepository->find($commandeId);
         $selectedReservation = $reservationRepository->find($reservationId);
+        $commande = $selectedReservation->getCommande();
+        $statut = $commande->getStatut();
 
         //La Reservation ne peut être supprimé si le produit n'existe pas ou si la commande est validée
         //! erreur

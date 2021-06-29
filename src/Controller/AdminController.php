@@ -113,8 +113,8 @@ class AdminController extends AbstractController
         $produitForm->handleRequest($request);
         if ($request->isMethod('post') && $produitForm->isValid()) {
             //Si le nom choisi pour notre Entity est déjà existant, nous ne persistons pas la requête et quittons immédiatement la fonction
-            $produitName = $produitRepository->findOneByName($produit->getName());
-            if ($produitName) {
+            $produitName = $produitRepository->findByName($produit->getName());
+            if (count($produitName) > 1) {
                 return $this->redirect($this->generateUrl('admin_dashboard'));
             }
             //Persistance et application de la requête
