@@ -5,49 +5,91 @@
 {% block body %}
 
 	<div class="container-fluid p-5">
-		<h3>Votre commande</h3>
-		<div class="container">
+		{% if commandeAttente is not null %}
+			<h3>Vos commandes en cours</h3>
+			<div class="container">
 
-			<table class="table mt-5">
-				<thead>
-					<tr>
-						<th scope="col">Numéro de commande</th>
-						<th scope="col">Adresse</th>
-						<th scope="col">Statut</th>
-						<th scope="col">Date de commande</th>
-						<th scope="col">Produit</th>
-						<th scope="col">Prix</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% set i = 0 %}
-					{% for commande in commandes %}
+				<table class="table mt-5">
+					<thead>
 						<tr>
-							<th scope="row">{{ commande.id }}</th>
-							<td>{{ commande.adresse }}</td>
-							<td>{{ commande.statut }}</td>
-							<td>{{ commande.creationDate|date('Le d/m/Y à h:i:s') }}</td>
-							{% for reservation in commande.reservations %}
-								<td>{{ reservation.produit.name }}</td>
-								<td>{{ reservation.produit.price }}€</td>
-								<td>
-									{#! style : coller les deux colonnes et placer le bouton #}
-									<a href="{{ path('delete_reservation',{"reservationId":reservation.id}) }}">
-										<button class="btn btn-danger" style="display : {{ displayDeleteBtn[i] }};">Supprimer</button>
-									</a>
-								</td>
-							{% endfor %}
-							{% set i = i + 1 %}
-							<td>
-								<a href="{{ path('confirm_command',{"commandId":commande.id}) }}">
-									<button class="btn btn-success">Valider</button>
-								</a>
-							</td>
+							<th scope="col">Numéro de commande</th>
+							<th scope="col">Adresse</th>
+							<th scope="col">Date de commande</th>
+							<th scope="col">Produit</th>
+							<th scope="col">Prix</th>
 						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+						<tr>
+							<th scope="row">{{ commandeAttente.id }}</th>
+							<td>{{ commandeAttente.adresse }}</td>
+							<td>{{ commandeAttente.creationDate|date('Le d/m/Y à h:i:s') }}</td>
+							{% for reservation in commandeAttente.reservations %}
+								<tr>
+									<td colspan="3"></td>
+									<td>{{ reservation.produit.name }}</td>
+									<td>{{ reservation.produit.price }}</td>
+								</tr>
+								<tr>
+									<td colspan="3"></td>
+									<td colspan="2">
+										<a href="{{ path('delete_reservation',{"reservationId" : reservation.id}) }}">
+											<button class="btn btn-danger">Supprimer</button>
+										</a>
+									</td>
+								</tr>
+							{% endfor %}
+						</tr>
+					</tbody>
+				</table>
+				<a href="{{ path('confirm_command',{"commandId":commandeAttente.id}) }}">
+					<button class="btn btn-success">Valider</button>
+				</a>
+				<a href="{{ path('cancel_command',{"commandId":commandeAttente.id}) }}">
+					<button class="btn btn-success">Supprimer</button>
+				</a>
+
+			{% endif %}
+
 
 		</div>
+		{% if commandesValid is not empty %}
+			<h3 class="my-5">Vos commandes validées</h3>
+			<div class="container">
+
+				<table class="table mt-5">
+					<thead>
+						<tr>
+							<th scope="col">Numéro de commande</th>
+							<th scope="col">Adresse</th>
+							{# <th scope="col">Statut</th> #}
+							<th scope="col">Date de commande</th>
+							<th scope="col">Produit</th>
+							<th scope="col">Prix</th>
+						</tr>
+					</thead>
+					<tbody>
+						{# {% set i = 0 %} #}
+						{% for commande in commandesValid %}
+							<tr>
+								<th scope="row">{{ commande.id }}</th>
+								<td>{{ commande.adresse }}</td>
+								{# <td>{{ commande.statut }}</td> #}
+								<td>{{ commande.creationDate|date('Le d/m/Y à h:i:s') }}</td>
+								{% for reservation in commande.reservations %}
+									<td>{{ reservation.produit.name }}</td>
+									<td>{{ reservation.produit.price }}€</td>
+
+								{% endfor %}
+								{# {% set i = i + 1 %} #}
+
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+
+
+			</div>
+		{% endif %}
 	</div>
 {% endblock %}

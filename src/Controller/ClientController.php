@@ -22,15 +22,12 @@ class ClientController extends AbstractController
     {
         $entityManager = $this->getDoctrine()->getManager();
         $commandeRepository = $entityManager->getRepository(Commande::class);
-        $commandes = $commandeRepository->findAll();
-
-        foreach ($commandes as $commande) {
-            $displayDeleteBtn[] = ($commande->getStatut() == "Validée") ? "none" : "block";
-        }
+        $commandeAttente = $commandeRepository->findOneByStatut("Panier");
+        $commandesValid = $commandeRepository->findByStatut("Validée");
 
         return $this->render('client/client-dashboard.html.twig', [
-            'commandes' => $commandes,
-            'displayDeleteBtn' => $displayDeleteBtn,
+            'commandeAttente' => $commandeAttente,
+            'commandesValid' => $commandesValid
         ]);
     }
 
@@ -41,11 +38,10 @@ class ClientController extends AbstractController
     {
         $entityManager = $this->getDoctrine()->getManager();
         $commandeRepository = $entityManager->getRepository(Commande::class);
-        $reservationRepository = $entityManager->getRepository(Reservation::class);
 
-        $commandes = $commandeRepository->findAll();
+        $commandeAttente = $commandeRepository->findOneByStatut("Panier");
+        $commandesValid = $commandeRepository->findByStatut("Validée");
         $selectedCommande = $commandeRepository->find($commandId);
-        $reservations = $selectedCommande->getReservations();
 
         if (!$selectedCommande->getStatut() == "Panier") {
             return $this->redirect($this->generateUrl('client_dashboard'));
@@ -55,14 +51,41 @@ class ClientController extends AbstractController
         $entityManager->persist($selectedCommande);
         $entityManager->flush();
 
-        foreach ($commandes as $commande) {
-            $displayDeleteBtn[] = ($commande->getStatut() == "Validée") ? "none" : "block";
-        }
 
         return $this->render('client/client-dashboard.html.twig', [
-            'commandes' => $commandes,
-            'reservations' => $reservations,
-            'displayDeleteBtn' => $displayDeleteBtn
+            'commandeAttente' => $commandeAttente,
+            'commandesValid' => $commandesValid
+        ]);
+    }
+
+    /**
+     * @Route("/cancel/{commandId}",name="cancel_command")
+     */
+    public function cancelCommand(Request $request, $commandId)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $commandeRepository = $entityManager->getRepository(Commande::class);
+
+        $commandeAttente = $commandeRepository->findOneByStatut("Panier");
+        $commandesValid = $commandeRepository->findByStatut("Validée");
+        $selectedCommande = $commandeRepository->find($commandId);
+
+        if (!$selectedCommande->getStatut() == "Panier") {
+            return $this->redirect($this->generateUrl('client_dashboard'));
+        }
+
+        $reservations = $selectedCommande->getReservations();
+        foreach ($reservations as $reservation) {
+            $entityManager->remove($reservation);
+        }
+
+        $entityManager->remove($selectedCommande);
+        $entityManager->flush();
+
+
+        return $this->render('client/client-dashboard.html.twig', [
+            'commandeAttente' => $commandeAttente,
+            'commandesValid' => $commandesValid
         ]);
     }
 
@@ -77,17 +100,11 @@ class ClientController extends AbstractController
         $produitRepository = $entityManager->getRepository(Produit::class);
         $commandeRepository = $entityManager->getRepository(Commande::class);
 
-        $produits = $produitRepository->findAll();
-        $reservations = $reservationRepository->findAll();
-        $commandes = $commandeRepository->findAll();
+        $commandeAttente = $commandeRepository->findOneByStatut("Panier");
+        $commandesValid = $commandeRepository->findByStatut("Validée");
         $selectedReservation = $reservationRepository->find($reservationId);
         $commande = $selectedReservation->getCommande();
         $statut = $commande->getStatut();
-
-        //La Reservation ne peut être supprimé si le produit n'existe pas ou si la commande est validée
-        //! erreur
-        // $produit = $selectedReservation->getProduit();
-        // $statut = $produit->getStatut();
 
         if (!$selectedReservation || $statut == "Validée") {
             return $this->redirect($this->generateUrl('client_dashboard'));
@@ -98,18 +115,15 @@ class ClientController extends AbstractController
         $entityManager->flush();
 
         //La commande est supprimée si la dernière réservation a été supprimée, soit si la table Reservation est nulle
-        if (count($reservations) == 1) { //? pourquoi je dois le mettre à 1 ? pas actualisé ?
+        $reservations = $commande->getReservations();
+        if (count($reservations) == 0) {
             $entityManager->remove($commande);
             $entityManager->flush();
         }
 
-        foreach ($commandes as $commande) {
-            $displayDeleteBtn[] = ($commande->getStatut() == "Validée") ? "none" : "block";
-        }
-
-        return $this->render('index/index.html.twig', [
-            "produits" => $produits,
-            "displayDeleteBtn" => $displayDeleteBtn,
+        return $this->render('client/client-dashboard.html.twig', [
+            'commandeAttente' => $commandeAttente,
+            'commandesValid' => $commandesValid
         ]);
     }
 }

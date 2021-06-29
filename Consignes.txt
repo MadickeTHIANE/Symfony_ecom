@@ -91,5 +91,6 @@ ClientController doit posséder une méthode offrant un rendu de ce template, no
     Chaque Reservation de la Commande active doit posséder un bouton rouge de suppression, permettant de supprimer la Reservation. Si la dernière Reservation d'une Commande est supprimée, la Commande doit également être supprimée.
     
      A noter qu'il doit être impossible de supprimer les Reservations d'une Commande validée et que le bouton de suppression ne doit pas être visible pour les entrées des Commandes validées.
+     
         A côté du bouton de validation de la Commande doit coexister un bouton de suppression de la Commande active. Ce bouton a pour effet de supprimer toutes les Reservations de la Commande une par une avant de finir par supprimer la Commande elle-même. Ce bouton ne fonctionne que pour les Commandes en statut "Panier".
     Toutes les méthodes nécessaires pour l'implémentation de ce backoffice client doivent être écrites dans ClientController.
