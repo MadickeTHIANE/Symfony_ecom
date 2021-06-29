@@ -10,6 +10,8 @@ use App\Entity\Reservation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class IndexController extends AbstractController
@@ -93,75 +95,126 @@ class IndexController extends AbstractController
      */
     public function ficheProduit(Request $request, $produitId)
     {
+        //*Récupération des données nécessaires
         $entityManager = $this->getDoctrine()->getManager();
         $produitRepository = $entityManager->getRepository(Produit::class);
         $categoryRepository = $entityManager->getRepository(Category::class);
-        $selectedProduit = $produitRepository->find($produitId);
+        $commandeRepository = $entityManager->getRepository(Commande::class);
+        $produit = $produitRepository->find($produitId);
         $categories = $categoryRepository->findAll();
-        if (!$selectedProduit) {
+        $produitStock = $produit->getStock();
+
+        //*On vérifie si le produit existe
+        if (!$produit) {
             $this->redirect($this->generateUrl('index'));
         }
-        $produit = $selectedProduit;
-        if ($produit->getStock() == 0) {
-            return $this->render('index/fiche-produit.html.twig', [
-                "display" => "none",
-                "produit" => $produit
-            ]);
+
+
+        //*Création du formulaire d'achat
+        $buyForm = $this->createFormBuilder()
+            ->add('quantity', IntegerType::class, [
+                "label" => "Quantité",
+                "attr" => [
+                    "min" => 1,
+                    "value" => 1
+                ]
+            ])
+            ->add('valider', SubmitType::class, [
+                "label" => "Valider",
+                "attr" => [
+                    "class" => "w3 w3-black"
+                ]
+            ])
+            ->getForm();
+
+        //*Transmission de la requête client au formulaire. Si elle est valide, création/update de la commande
+        $buyForm->handleRequest($request);
+        if ($request->isMethod('post') && $buyForm->isValid()) {
+            if ($produitStock > 0) {
+
+                $reservation = new Reservation;
+                $reservation->setProduit($produit);
+                //Nous vérifions si une Commande est en cours, sinon nous la créons.
+                $commande = $commandeRepository->findOneByStatut('Panier');
+                if (!$commande) {
+                    $commande = new Commande('Panier', [$reservation]);
+                    $commande->setAdresse('null');
+                } else {
+                    //Nous lui transmettons ensuite notre nouvelle Reservation
+                    $commande->addReservation($reservation);
+                }
+                //On récupère la quantité commandée
+                $data = $buyForm->getData(); //* Renvoie un tableau associatif
+                $quantity = $data["quantity"];
+                //Nous déterminons la Quantity de notre Reservation avant de l'enregistrer dans une variable
+                $reservationQuantity = $reservation->setQuantity($quantity)->getQuantity();
+                //Notre nouveau stock pour Produit correspond à la différence du stock de Produit et de la quantity de Reservation
+                //Si la quantité commandée est supérieure à la quantité disponible, on fait en sorte de mettre le reste du stock dans la Reservation
+                $produitManquant = $produitStock - $reservationQuantity;
+                if ($produitManquant < 0) {
+                    $produit->setStock(0);
+                    $reservation->setQuantity($reservationQuantity + $produitManquant);
+                } else {
+                    $produit->setStock($produitStock - $reservationQuantity);
+                }
+
+                $entityManager->persist($produit);
+                $entityManager->persist($commande);
+                $entityManager->persist($reservation);
+                $entityManager->flush();
+
+                return $this->redirect($this->generateUrl('client_dashboard'));;
+            } else {
+                return $this->redirect($this->generateUrl('index'));;
+            }
         }
+
         return $this->render('index/fiche-produit.html.twig', [
             "produit" => $produit,
             "categories" => $categories,
-            "display" => "block"
+            "dataForm" => $buyForm->createView(),
         ]);
     }
 
-    /**
-     * @Route("/produit/buy/{produitId}",name="buy_produit")
-     */
-    public function buyProduit(Request $request, $produitId)
-    {
-        $entityManager = $this->getDoctrine()->getManager();
-        $produitRepository = $entityManager->getRepository(Produit::class);
-        $commandeRepository = $entityManager->getRepository(Commande::class);
-        $produit = $produitRepository->find($produitId);
-        //Si le produit n'est pas trouvé, nous retournons vers la page d'accueil
-        if (!$produit) {
-            return $this->redirect($this->generateUrl('index'));
-        }
-        //Si le produit existe et si son stock est supérieur à zero, nous créons une nouvelle Reservation
-        $produitStock = $produit->getStock();
-        if ($produitStock > 0) {
+    // /**
+    //  * @Route("/produit/buy/{produitId}",name="buy_produit")
+    //  */
+    // public function buyProduit(Request $request, $produitId)
+    // {
+    //     //Si le produit existe et si son stock est supérieur à zero, nous créons une nouvelle Reservation
+    //     $produitStock = $produit->getStock();
+    //     if ($produitStock > 0) {
 
-            $reservation = new Reservation;
-            $reservation->setProduit($produit);
-            //Nous vérifions si une Commande est en cours, sinon nous la créons.
-            $commande = $commandeRepository->findOneByStatut('Panier');
-            if (!$commande) {
-                $commande = new Commande('Panier', [$reservation]);
-                $commande->setAdresse('null');
-            } else {
-                //Nous lui transmettons ensuite notre nouvelle Reservation
-                $commande->addReservation($reservation);
-            }
-            //Nous déterminons la Quantity de notre Reservation avant de l'enregistrer dans une variable
-            $reservationQuantity = $reservation->setQuantity(1)->getQuantity();
-            //Notre nouveau stock pour Produit correspond à la différence du stock de Produit et de la quantity de Reservation
-            $produit->setStock($produitStock - $reservationQuantity);
-            $entityManager->persist($produit);
-            $entityManager->persist($commande);
-            $entityManager->persist($reservation);
-            $entityManager->flush();
+    //         $reservation = new Reservation;
+    //         $reservation->setProduit($produit);
+    //         //Nous vérifions si une Commande est en cours, sinon nous la créons.
+    //         $commande = $commandeRepository->findOneByStatut('Panier');
+    //         if (!$commande) {
+    //             $commande = new Commande('Panier', [$reservation]);
+    //             $commande->setAdresse('null');
+    //         } else {
+    //             //Nous lui transmettons ensuite notre nouvelle Reservation
+    //             $commande->addReservation($reservation);
+    //         }
+    //         //Nous déterminons la Quantity de notre Reservation avant de l'enregistrer dans une variable
+    //         $reservationQuantity = $reservation->setQuantity(1)->getQuantity();
+    //         //Notre nouveau stock pour Produit correspond à la différence du stock de Produit et de la quantity de Reservation
+    //         $produit->setStock($produitStock - $reservationQuantity);
+    //         $entityManager->persist($produit);
+    //         $entityManager->persist($commande);
+    //         $entityManager->persist($reservation);
+    //         $entityManager->flush();
 
-            $display = ($produitStock == 0) ? "none" : "block";
-            return $this->render('index/fiche-produit.html.twig', [
-                "produit" => $produit,
-                "display" => $display
-            ]);
-        } else {
-            return $this->render('index/fiche-produit.html.twig', [
-                "display" => "none",
-                "produit" => $produit
-            ]);
-        }
-    }
+    //         $display = ($produitStock == 0) ? "none" : "block";
+    //         return $this->render('index/fiche-produit.html.twig', [
+    //             "produit" => $produit,
+    //             "display" => $display
+    //         ]);
+    //     } else {
+    //         return $this->render('index/fiche-produit.html.twig', [
+    //             "display" => "none",
+    //             "produit" => $produit
+    //         ]);
+    //     }
+    // }
 }
