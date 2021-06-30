@@ -39,6 +39,12 @@
 					{{form(dataForm)}}
 					</div>
 				</div>
+			{% else %}
+				<div class="alert alert-warning text-center">
+					<p>
+						<b>Veuillez vous connecter afin de pouvoir passer commande</b>
+					</p>
+				</div>
 			{% endif %}
 		</div>
 	{% endblock %}

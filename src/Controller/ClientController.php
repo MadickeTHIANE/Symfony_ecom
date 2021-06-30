@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Produit;
+use App\Entity\User;
+use App\Entity\Tag;
 use App\Entity\Category;
 use App\Entity\Commande;
 use App\Entity\Reservation;
@@ -21,22 +23,39 @@ class ClientController extends AbstractController
      */
     public function clientDashboard(): Response
     {
+        $entityManager = $this->getDoctrine()->getManager();
+
         //Récupération de l'Utilisateur
         $user = $this->getUser();
-        $entityManager = $this->getDoctrine()->getManager();
-        $commandeRepository = $entityManager->getRepository(Commande::class);
-        //Nous récupérons la liste des Category pour notre navbar
+
+        //Récupération des commandes de l'utilisateur
+        $commandesUser = $user->getCommandes();
+
+        //Nous récupérons la liste des Category et des tags pour notre navbar
         $categoryRepository = $entityManager->getRepository(Category::class);
+        $tagRepository = $entityManager->getRepository(Tag::class);
         $categories = $categoryRepository->findAll();
-        //Nous récupérons dans le cadre de deux recherches, la liste des Commande validées et la commande en mode Panier
-        $activeCommande = $commandeRepository->findOneByStatut("Panier");
-        $commandes = $commandeRepository->findByStatut("Validée");
+        $tags = $tagRepository->findAll();
+
+        //Nous récupérons dans le cadre de deux recherches, la liste des Commande validées et la commande en mode Panier du user
+        $commandes = [];
+        $activeCommande = null;
+        if ($commandesUser) {
+            foreach ($commandesUser as $commande) {
+                if ($commande->getStatut() == "Validée") {
+                    $commandes[] = $commande;
+                } else {
+                    $activeCommande = $commande;
+                }
+            }
+        }
 
         return $this->render('client/client-dashboard.html.twig', [
+            'categories' => $categories,
+            'tags' => $tags,
+            'user' => $user,
             'activeCommande' => $activeCommande,
             'commandes' => $commandes,
-            'categories' => $categories,
-            'user' => $user
         ]);
     }
 

@@ -22,6 +22,7 @@ class IndexController extends AbstractController
      */
     public function index(): Response
     {
+        $user = $this->getUser();
         $entityManager = $this->getDoctrine()->getManager();
         $produitRepository = $entityManager->getRepository(Produit::class);
         $categoryRepository = $entityManager->getRepository(Category::class);
@@ -33,6 +34,7 @@ class IndexController extends AbstractController
             'produits' => $produits,
             'categories' => $categories,
             "tags" => $tags,
+            "user" => $user
         ]);
     }
 
@@ -41,6 +43,7 @@ class IndexController extends AbstractController
      */
     public function indexCategory(Request $request, $categoryName = false): Response
     {
+        $user = $this->getUser();
         //Cette fonction a pour but d'afficher la page d'accueil mais uniquement avec les éléments qui correspondent à la catégorie indiquée
         //Elle doit être disponible via les différentes options du menu déroulant Categories
         //Nous récupérons le Repository de l'Entity dont nous avions besoin, laquelle est Category
@@ -65,7 +68,8 @@ class IndexController extends AbstractController
         return $this->render('index/index.html.twig', [
             "produits" => $produits,
             "tags" => $tags,
-            'categories' => $categories
+            'categories' => $categories,
+            "user" => $user
         ]);
     }
 
@@ -74,6 +78,7 @@ class IndexController extends AbstractController
      */
     public function indexTag(Request $request, $tagId)
     {
+        $user = $this->getUser();
         $entityManager = $this->getDoctrine()->getManager();
         $tagRepository = $entityManager->getRepository(Tag::class);
         $categoryRepository = $entityManager->getRepository(Category::class);
@@ -87,7 +92,8 @@ class IndexController extends AbstractController
         return $this->render('index/index.html.twig', [
             "tags" => $tags,
             "categories" => $categories,
-            "produits" => $produits
+            "produits" => $produits,
+            "user" => $user
         ]);
     }
 
@@ -134,18 +140,34 @@ class IndexController extends AbstractController
         if ($request->isMethod('post') && $buyForm->isValid()) {
             if ($produitStock > 0) {
 
+                //Nous vérifions que le user est connecté
+                if (empty($user)) {
+                    return $this->redirect($this->generateUrl('app_login'));
+                }
+
                 $reservation = new Reservation;
                 $reservation->setProduit($produit);
+
+                //On récupére toutes les commandes actives
+                $commandesActive = $commandeRepository->findByStatut('Panier');
+
+                //On récupère la commande du user connecté
+                foreach ($commandesActive as $commandeActive) {
+                    if ($commandeActive->getUser()->getId() == $user->getId()) {
+                        $commandeUser = $commandeActive;
+                    }
+                }
+
                 //Nous vérifions si une Commande est en cours, sinon nous la créons.
-                $commande = $commandeRepository->findOneByStatut('Panier');
-                if (!$commande && !empty($user)) {
-                    $commande = new Commande('Panier', [$reservation]);
-                    $commande->setUser($user);
-                    $commande->setAdresse('null');
+                if (!isset($commandeUser)) {
+                    $commandeUser = new Commande('Panier', [$reservation]);
+                    $commandeUser->setUser($user);
+                    $commandeUser->setAdresse('null');
                 } else {
                     //Nous lui transmettons ensuite notre nouvelle Reservation
-                    $commande->addReservation($reservation);
+                    $commandeUser->addReservation($reservation);
                 }
+
                 //On récupère la quantité commandée
                 $data = $buyForm->getData(); //* Renvoie un tableau associatif
                 $quantity = $data["quantity"];
@@ -162,11 +184,11 @@ class IndexController extends AbstractController
                 }
 
                 $entityManager->persist($produit);
-                $entityManager->persist($commande);
+                $entityManager->persist($commandeUser);
                 $entityManager->persist($reservation);
                 $entityManager->flush();
 
-                return $this->redirect($this->generateUrl('client_dashboard'));;
+                return $this->redirect($this->generateUrl('index'));;
             } else {
                 return $this->redirect($this->generateUrl('index'));;
             }
