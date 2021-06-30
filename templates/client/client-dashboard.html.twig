@@ -6,6 +6,13 @@
 	<div class="w3-container w3-content w3-padding-64" style="max-width:800px" id="dashboard">
 		<div class="w3-center">
 			<h1 class="w3-wide">TABLEAU DE BORD</h1>
+			{% if user is not null %}
+				<p class="w3-opacity w3-center">
+					<b>Bienvenue
+						{{ user.username }}</b>
+					!
+				</p>
+			{% endif %}
 		</div>
 
 		<h3 class="w3-wide w3-center">Liste des Commandes</h3>

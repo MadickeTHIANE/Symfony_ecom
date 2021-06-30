@@ -45,7 +45,7 @@ class SecurityController extends AbstractController
                     'Role : ADMIN' => 'ROLE_ADMIN',
                     'Role : SUPERADMIN' => 'ROLE_SUPERADMIN',
                 ],
-                'expanded' => false,
+                'expanded' => true,
                 'multiple' => true,
             ])
             ->add('register', SubmitType::class, [

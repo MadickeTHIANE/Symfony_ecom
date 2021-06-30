@@ -21,6 +21,8 @@ class ClientController extends AbstractController
      */
     public function clientDashboard(): Response
     {
+        //Récupération de l'Utilisateur
+        $user = $this->getUser();
         $entityManager = $this->getDoctrine()->getManager();
         $commandeRepository = $entityManager->getRepository(Commande::class);
         //Nous récupérons la liste des Category pour notre navbar
@@ -33,7 +35,8 @@ class ClientController extends AbstractController
         return $this->render('client/client-dashboard.html.twig', [
             'activeCommande' => $activeCommande,
             'commandes' => $commandes,
-            'categories' => $categories
+            'categories' => $categories,
+            'user' => $user
         ]);
     }
 

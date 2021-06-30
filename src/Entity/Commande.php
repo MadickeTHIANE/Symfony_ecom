@@ -2,7 +2,9 @@
 
 namespace App\Entity;
 
+use App\Entity\User;
 use App\Entity\Produit;
+use App\Entity\Reservation;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CommandeRepository;
 use Doctrine\Common\Collections\Collection;
@@ -39,6 +41,12 @@ class Commande
      * @ORM\OneToMany(targetEntity=Reservation::class, mappedBy="commande")
      */
     private $reservations;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="commandes")
+     * @ORM\JoinColumn(nullable = true)
+     */
+    private $user;
 
     public function __construct(string $statut, array $reservations)
     {

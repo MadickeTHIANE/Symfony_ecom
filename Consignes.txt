@@ -100,3 +100,7 @@ Création d'un formulaire au sein de ficheProduit() lequel permettra de saisir l
 
 	- Créer un formulaire intérieur au sein de ficheProduit(), ce formulaire devra contenir deux champs, un champ 'quantity' de type IntegerType, et un bouton de validation SubmitType. Ce formulaire devra remplacer le bouton "Acheter". Utiliser la valeur attr pour conserver le CSS du bouton
     - Si le formulaire interne est valide et rempli, créer une structure de contrôle if au sein de ficheProduit() laquelle exécutera les instructions que nous avons préparé au sein de buyProduit(). Ainsi, buyProduit ne sera plus utilisé par notre application. Adapter les instructions pour qu'elles prennent en compte les quantités saisies sur notre nouveau formulaire.
+
+========================================================================================================================================================================================================================================================================================================================================================
+
+	- Créer une relation entre l'Entity User et Commande (OtM, MtO)
