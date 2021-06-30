@@ -12,7 +12,7 @@
 						<i class="fa fa-caret-down"></i>
 					</button>
 					<div class="w3-dropdown-content w3-bar-block w3-card-4">
-						<a href="{{path('admin_dashboard')}}" class="w3-bar-item w3-button">TABLEAU D'ADMINISTRATION</a>
+
 						{% for category in categories %}
 							<a href="{{ path('index_category',{"categoryName":category.name}) }}" class="w3-bar-item w3-button">{{ category.name }}</a>
 						{% endfor %}
@@ -25,7 +25,6 @@
 						<i class="fa fa-caret-down"></i>
 					</button>
 					<div class="w3-dropdown-content w3-bar-block w3-card-4">
-						<a href="{{path('admin_dashboard')}}" class="w3-bar-item w3-button">TABLEAU D'ADMINISTRATION</a>
 						{% for tag in tags %}
 							<a href="{{ path('index_tag',{"tagId":tag.id}) }}" class="w3-bar-item w3-button">{{ tag.name }}</a>
 						{% endfor %}
@@ -33,7 +32,7 @@
 				</div>
 			{% endif %}
 
-			<a href="{{ path('client_dashboard') }}" class="w3-bar-item w3-button w3-padding-large w3-hide-small">PANIER</a>
+
 			<div class="w3-dropdown-hover w3-hide-small">
 				<button class="w3-padding-large w3-button" title="More">OPTIONS
 					<i class="fa fa-caret-down"></i>
@@ -44,6 +43,7 @@
 					<a href="#" class="w3-bar-item w3-button">Media</a>
 				</div>
 			</div>
+			<a href="{{ path('client_dashboard') }}" class="w3-bar-item w3-button w3-padding-large w3-hide-small w3-right">PANIER</a>
 			<a href="javascript:void(0)" class="w3-padding-large w3-hover-red w3-hide-small w3-right">
 				<i class="fa fa-search"></i>
 			</a>
