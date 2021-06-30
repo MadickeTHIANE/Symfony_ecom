@@ -1,0 +1,81 @@
+Utilisateurs et Sécurité avec Symfony
+
+Symfony possède plusieurs composants chargés de gérer l'aspect de sécurité et d'identification des utilisateurs. Pour faire simple, Symfony possède un type d'Entity spécial, lequel est chargé de gérer tout l'aspect de la connexion et de la gestion des profils des différents utilisateurs de l'application. La connexion et l'authentification sont gérés par un module annexe, auth (pour Authenticator), lequel est configuré par ses propres classes PHP ainsi que par les options du dossier config (config/packages/security.yaml)
+
+Nous allons donc commencer par créer un Utilisateur (classe User), le configurer, créer l'Authenticator correspondant, et apprendre à gérer l'aspect sécurité de notre application. Afin de créer un User, il ne faut PAS utiliser make:Entity. A la place, il faut utiliser la commande suivante:
+	php bin/console make:user
+
+Si le document security.yaml possède un contenu basique avant la création de notre classe Entity User, l'exécution de cette commande modifie le fichier. A présent, une option d'encodage des mots de passe a été ajoutée, ainsi que la création d'un "provider", dont le but est de récupérer les différentes entités utilisateur et se charger du processus d'identification au sein de notre application. Il n'existe à présent qu'une seule Entity prise en charge par notre provider, que nous avons appelé App\Entity\User, mais il est possible (dans le cadre d'applications plus complexes) de faire gérer simultanément plusieurs classes de type utilisateur par le Provider.
+
+Une fois que la classe User a été créée, il reste à ajouter l'élement complémentaire de la gestion de la sécurité sur Symfony, la collection de classes chargées de tout l'aspect connexion et gestion de la session, qui est donc la classe Authenticator.
+	php bin/console make:auth
+
+A travers la création de l'Authenticator, un Controller associé à la sécurité est généré (par défaut SecurityController), et une nouvelle classe php est créée, gérant l'aspect de l'authentification, à l'intérieur d'un dossier Security généré l'intérieur du dossier "src" de notre application. Sur notre requête, un formulaire de login et une gestion de la déconnexion (une route /logout) ont également été générés. Ainsi, tout l'aspect de la connexion, déconnexion et gestion de la session sont actuellement pris en charge par nos deux nouveaux modules.
+
+Une fois l'Authenticator créé, il ne faut pas oublier de modifier le fichier contenu dans le dossier security, à la fonction on AuthenticationSuccess(). En effet, la fonction doit être modifiée afin d'ajouter une route valide en cas de connexion directe via la page de login. Il faut donc retirer l'instruction génératrice d'erreur "throw new /Exception" et la remplacer par une redirection vers la page désirée (dans notre cas, l'index).
+	return new RedirectResponse($this->urlGenerator->generate('index'));
+
+Une fois que l'Utilisateur et l'Authenticator sont créés, il faudra actualiser l'état de notre base de données via une migration.
+
+-----
+
+Sécurité et contrôle d'accès
+
+Par défaut, la configuration de notre fichier de sécurité "security.yaml" indique les deux paramètres Anonymous et Lazy en true. Le mode Lazy, qui est donc activé par défaut, signifie que la nécessité d'authentification n'est pas activée tant qu'elle n'est pas explicitement demandée par l'application. En pratique, ceci signifie que l'accès à notre site et à ses différentes routes est public. Bien que cela soit ce que nous désirons, il se peut qu'il existe au sein de notre site web certaines parties dont l'accès doit être régulé, telles que les sections consacrées à l'administration et aux réglages du site, ou encore les paramètres propres à chaque utilisateur.
+Pour cela, nous allons utiliser ce qu'on appelle le contrôle d'accès et les autorisations.
+
+Les autorisations peuvent être administrées à plusieurs degrés: Le contrôle d'accès est défini par les routes, cependant, il est possible de paramétrer une autorisation spéciale pour un Controller, une fonction, ou même au niveau d'une vue.
+
+Le contrôle d'accès (access_control) est trouvé au sein de notre fichier security.yaml. Nous pouvons voir une option préécrite nommée access_control, avec des exemples de path écrits en commentaire.
+	- { path: ^/admin, roles: ROLE_ADMIN }
+
+Nous pouvons comprendre par cet exemple que toute route commençant (noté par le ^) par '/admin' sera soumise à une autorisation exclusive pour les utilisateurs connectés bénéficiant du rôle ROLE_ADMIN.
+
+L'accès "is_granted()"
+
+Si nous ne désirons pas utiliser le contrôle d'accès pour pouvoir limiter l'accessibilité de notre site web mais que nous désirons employer d'autres outils plus précis, nous pouvons employer l'annotation is_granted() pour placer un contrôle d'autorisation en amont de nos controllers ou même de nos fonctions.
+
+	/**
+	* @Security("is_granted('ROLE_ADMIN')")
+	*/
+
+ATTENTION: Avant de pouvoir utiliser cette annotation Security, il est indispensable de spécifier ce use: 
+	use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+(Les IDE ont tendance à supprimer ce use, considéré comme non utilisé du fait de son emploi dans les annotations uniquement)
+
+L'accès "is_granted()" est également un test conditionnel Twig, qui peut être employé lors de la génération du template afin de spécialiser l'affichage de la page web en fonction des privilèges détenus par l'utilisateur. Il suffit d'utiliser la condition "if"
+
+	{% if is_granted('ROLE_ADMIN') %}
+		<a href={{ path('dashboard_display') }}><p>Réglages Administrateur</p></a>
+	{% endif %}
+
+Il est à noter que la fonction getRoles de notre Entity User rendra toujours ROLE_USER via son tableau, même si ce rôle n'y est pas présent. Ainsi, vérifier l'existence d'un ROLE_USER revient à vérifier s'il y a un utilisateur connecté.
+
+Aussi, au sein du Controller, la fonction
+	$this->getUser();
+permet de récupérer l'utilisateur en cours (en cas de connexion anonyme, cette fonction rendra NULL). Nous pouvons ensuite utiliser l'Entity ainsi obtenue pour récupérer des informations sur l'utilisateur connecté, tel que son username, via des getters:
+
+	$displayName = $this->getUser()->getUsername();
+
+
+La mise en place de plusieurs Entity liées à User
+
+Dans certains cas de figure, nous pouvons désirer créer plusieurs types d'Utilisateurs au sein de notre application, lesquels auront accès à des fonctionnalités différentes. Par exemple, nous pouvons désirer faire en sorte que la séparation entre le simple Client et l'Administrateur soit une question de classe-même plutôt que de simples Roles (privilège), ou encore nous pouvons vouloir réserver à l'Entity Administrateur des champs dans notre table SQL qui n'ont pas de sens du point de vue Client, et inversement (par exemple, la présence d'une adresse ou d'une liste de commande peut paraître superflue pour un compte Administrateur).
+
+Il est possible de créer plusieurs Entity capables de se connecter, en créant un lien entre ces Entity et la classe de base User, laquelle prendra en compte toutes les fonctionnalités de connexion. Pour cela, il faudra effectuer quelques changements dans notre fichier de configuration security.yaml ainsi que dans les annotations de nos Entity concernées.
+
+Afin de pouvoir lier différentes Entity à notre classe User et permettre une connexion à notre application via ces Entity, nous devons tout d'abord créer les Entity concernées via make:entity, avant de les faire hériter de notre classe User. Ensuite, nous devons aller dans notre classe User et y ajouter les annotations suivantes:
+	/**
+	* //(déclaration de repository)
+	* @ORM\InheritanceType("JOINED")
+	* @ORM\DiscriminatorColumn(name="type", type="string")
+	* @ORM\DiscriminatorMap({"client"="Client", "admin"="Admin"})
+	*/
+
+Dans le cas de figure où nous désirons ajouter deux classes susceptibles de se connecter via les fonctionnalités de notre classe User, ici Client et Admin. Nous devons également faire de User une classe abstraite, afin de ne pas avoir à l'inclure dans la liste des Entity capables de se connecter.
+
+Ensuite, il ne faut pas oublier d'ajouter la déclaration d'héritage à nos classes.
+
+	class Client extends User{
+    	//
+    }
