@@ -102,6 +102,9 @@ class IndexController extends AbstractController
      */
     public function ficheProduit(Request $request, $produitId)
     {
+        //*Récupération de l'utilisateur
+        $user = $this->getUser();
+
         //*Récupération des données nécessaires
         $entityManager = $this->getDoctrine()->getManager();
         $produitRepository = $entityManager->getRepository(Produit::class);
@@ -109,8 +112,7 @@ class IndexController extends AbstractController
         $commandeRepository = $entityManager->getRepository(Commande::class);
         $produit = $produitRepository->find($produitId);
         $categories = $categoryRepository->findAll();
-        $produitStock = $produit->getStock();
-        $user = $this->getUser();
+
 
         //*On vérifie si le produit existe
         if (!$produit) {
@@ -138,57 +140,56 @@ class IndexController extends AbstractController
         //*Transmission de la requête client au formulaire. Si elle est valide, création/update de la commande
         $buyForm->handleRequest($request);
         if ($request->isMethod('post') && $buyForm->isValid()) {
-            if ($produitStock > 0) {
-
-                //Nous vérifions que le user est connecté
-                if (empty($user)) {
-                    return $this->redirect($this->generateUrl('app_login'));
-                }
+            $data = $buyForm->getData(); //* getData() renvoie un tableau associatif des données du formulaire
+            $produitStock = $produit->getStock();
+            //Nous vérifions si le stock existe et si l'utilisateur est connecté
+            if ($produitStock > 0 && $user) {
 
                 $reservation = new Reservation;
                 $reservation->setProduit($produit);
 
                 //On récupére toutes les commandes actives
-                $commandesActive = $commandeRepository->findByStatut('Panier');
+                $activeCommandes = $commandeRepository->findByStatut('Panier');
 
                 //On récupère la commande du user connecté
-                foreach ($commandesActive as $commandeActive) {
-                    if ($commandeActive->getUser()->getId() == $user->getId()) {
-                        $commandeUser = $commandeActive;
+                foreach ($activeCommandes as $activeCommande) {
+                    if ($activeCommande->getUser() == $user) {
+                        $userCommande = $activeCommande;
                     }
                 }
 
                 //Nous vérifions si une Commande est en cours, sinon nous la créons.
-                if (!isset($commandeUser)) {
-                    $commandeUser = new Commande('Panier', [$reservation]);
-                    $commandeUser->setUser($user);
-                    $commandeUser->setAdresse('null');
+                if (!isset($userCommande)) {
+                    $userCommande = new Commande('Panier', [$reservation]);
+                    $userCommande->setUser($user);
+                    $userCommande->setAdresse('null');
                 } else {
                     //Nous lui transmettons ensuite notre nouvelle Reservation
-                    $commandeUser->addReservation($reservation);
+                    $userCommande->addReservation($reservation);
                 }
 
                 //On récupère la quantité commandée
-                $data = $buyForm->getData(); //* Renvoie un tableau associatif
                 $quantity = $data["quantity"];
                 //Nous déterminons la Quantity de notre Reservation avant de l'enregistrer dans une variable
                 $reservationQuantity = $reservation->setQuantity($quantity)->getQuantity();
                 //Notre nouveau stock pour Produit correspond à la différence du stock de Produit et de la quantity de Reservation
                 //Si la quantité commandée est supérieure à la quantité disponible, on fait en sorte de mettre le reste du stock dans la Reservation
-                $produitManquant = $produitStock - $reservationQuantity;
-                if ($produitManquant < 0) {
+                $produitRequis = $produitStock - $reservationQuantity;
+                if ($produitRequis < 0) {
+                    $reservation->setQuantity($produitStock);
                     $produit->setStock(0);
-                    $reservation->setQuantity($reservationQuantity + $produitManquant);
                 } else {
                     $produit->setStock($produitStock - $reservationQuantity);
                 }
 
                 $entityManager->persist($produit);
-                $entityManager->persist($commandeUser);
+                $entityManager->persist($userCommande);
                 $entityManager->persist($reservation);
                 $entityManager->flush();
 
-                return $this->redirect($this->generateUrl('index'));;
+                return $this->redirect($this->generateUrl('fiche_produit', [
+                    'produitId' => $produit->getId()
+                ]));
             } else {
                 return $this->redirect($this->generateUrl('index'));;
             }
