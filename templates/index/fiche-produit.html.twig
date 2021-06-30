@@ -34,9 +34,11 @@
 					en stock</li>
 				<li>{{ produit.description }}</li>
 			</ul>
-			<div class="alert alert-success">
-				{{form(dataForm)}}
+			{% if user is not empty %}
+				<div class="alert alert-success">
+					{{form(dataForm)}}
+					</div>
 				</div>
-			</div>
+			{% endif %}
 		</div>
 	{% endblock %}

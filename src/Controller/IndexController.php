@@ -176,6 +176,7 @@ class IndexController extends AbstractController
             "produit" => $produit,
             "categories" => $categories,
             "dataForm" => $buyForm->createView(),
+            "user" => $user
         ]);
     }
 
