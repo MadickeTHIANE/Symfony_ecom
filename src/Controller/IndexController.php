@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Tag;
+use App\Entity\User;
 use App\Entity\Produit;
 use App\Entity\Category;
 use App\Entity\Commande;
@@ -103,6 +104,7 @@ class IndexController extends AbstractController
         $produit = $produitRepository->find($produitId);
         $categories = $categoryRepository->findAll();
         $produitStock = $produit->getStock();
+        $user = $this->getUser();
 
         //*On vérifie si le produit existe
         if (!$produit) {
@@ -136,8 +138,9 @@ class IndexController extends AbstractController
                 $reservation->setProduit($produit);
                 //Nous vérifions si une Commande est en cours, sinon nous la créons.
                 $commande = $commandeRepository->findOneByStatut('Panier');
-                if (!$commande) {
+                if (!$commande && !empty($user)) {
                     $commande = new Commande('Panier', [$reservation]);
+                    $commande->setUser($user);
                     $commande->setAdresse('null');
                 } else {
                     //Nous lui transmettons ensuite notre nouvelle Reservation
