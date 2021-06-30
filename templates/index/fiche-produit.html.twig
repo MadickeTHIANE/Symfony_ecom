@@ -34,17 +34,24 @@
 					en stock</li>
 				<li>{{ produit.description }}</li>
 			</ul>
-			{% if user is not empty %}
-				<div class="alert alert-success">
-					{{form(dataForm)}}
-					</div>
-				</div>
-			{% else %}
+
+			{% if user is empty %}
 				<div class="alert alert-warning text-center">
 					<p>
 						<b>Veuillez vous connecter afin de pouvoir passer commande</b>
 					</p>
 				</div>
-			{% endif %}
+			{% elseif produit.stock <= 0 %}
+				<div class="alert alert-danger">
+					<p>
+						<b>Produit indisponible pour le moment</b>
+					</p>
+				</div>
+			{% else  %}
+				<div class="alert alert-success">
+					{{form(dataForm)}}
+					</div>
+				{% endif %}
+			</div>
 		</div>
 	{% endblock %}
