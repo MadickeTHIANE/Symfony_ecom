@@ -9,11 +9,19 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+/*
+* InheritanceType("JOINED") => Les deux tables sont fusionnées pour opérer comme une Entity unique
+* DiscriminatorColumn => Une colonne ajoutée dans la table User pour distinguer quel type d'Entity est lié à notre instance de User, "name" est le nom de la colonne et "type" son type
+* DiscriminatorMap => Liste de toutes les Entity susceptibles d'être comprises dans notre fusion avec la table User. L'Entity User doit obligatoirement y être incorporée sauf si elle est déclarée abstraite
+*/
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @ORM\InheritanceType("JOINED")
+ * @ORM\DiscriminatorColumn(name="type", type="string")
+ * @ORM\DiscriminatorMap({"customer"="Customer", "admin"="Admin"})
  */
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+abstract class  User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @ORM\Id
