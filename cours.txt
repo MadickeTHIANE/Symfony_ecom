@@ -79,3 +79,37 @@ Ensuite, il ne faut pas oublier d'ajouter la déclaration d'héritage à nos cla
 	class Client extends User{
     	//
     }
+
+
+-----
+
+Les Namespace et les Services
+
+En amont de nos différentes classes, nous pouvons toujours constater la présence d'un namespace, qu'il s'agisse de App\Controller, App\Entity, ou même DoctrineMigrations. Le namespace permet de situer où se trouve la classe en question et donc de la contextualiser: en se situant dans un namespace particulier, la classe PHP révèle ainsi son rôle, sa fonction, et le namespace en tant que tel permet une organisation de notre application.
+
+De même, le namespace, contextualisant donc notre classe et l'insérant dans une catégorie particulière, permet de créer d'autres classes PHP possédant le même nom mais faisant partie d'un namespace différent. Ceci permet davantage de flexibilité et de modularité dans la constitution de différentes sections de notre application et par sa logique-même: nous n'avons pas besoin de penser à des noms alternatifs en travaillant sur une section particulière de notre application et nous n'avons pas à garder en tête la composition globale de notre application tandis que nous travaillons sur un module particulier. Ceci est de première importance dans le cadre d'une application développée par plusieurs individus ou dans le cadre de l'installation d'une bibliothèque extérieure.
+Etant donné que Symfony est une application conçue pour être extrêmement modulaire via l'usage de l'installateur de bibliothèques Composer, les namespace sont donc de première importance.
+
+Ainsi, lorsque nous désirons utiliser une classe PHP faisant partie d'un namespace étranger à la classe actuellement en cours d'utilisation, nous devons d'abord mentionner la classe et son arborescence via le mot-clef "use".
+
+
+Les Services
+
+Notre application va devoir utiliser de nombreuses fonctionnalités nécessaires pour pouvoir opérer certaines séries d'instructions que nous ne pouvons pas écrire nous-mêmes, du fait de leur complexité ou de leur lourdeur. Dans ce genre de cas, nous utilisons une série de classes spéciales que nous allons appeler les Services.
+
+Symfony possède une classe spéciale, nommée le Service Container. Cette classe permet d'instancier toutes les classes de service dont nous avons besoin en les mentionnant en paramètre de nos fonctions. Le Service Container permet de charger les classes Service mais également leurs dépendances (les autres classes dont ce service a besoin pour fonctionner correctement), ce qui permet de limiter les erreurs. Le Service Container n'instancie aussi le service demandé qu'une seule fois, ce qui permet de ne pas s'inquiéter en ce qui concerne la question des instances dupliquées.
+
+Ainsi, sous forme de service, une classe PHP dédiée à la résolution d'un problème particulier peut être écrite, comporter des dépendances qui seront toujours chargées par défaut, et venir assister nos fonctions par la simple mention de la classe de service en question dans les paramètres de notre fonction, sous forme d'une instance unique.
+
+C'est évidemment un atout fort pour la simplicité de nos fonctions et la modularité des différentes fonctionnalités de notre application.
+
+Nous possédons une commande de notre terminal qui nous permet de savoir quelle est la liste de services directement utilisables au sein des fonctions de notre Controller:
+	php bin/console debug:autowiring
+
+"Autowire" comme le nom l'indique concerne les différents services prêts à être automatiquement incorporés dans nos fonctions. Tous les services du container ne sont pas disponibles via l'autowire.
+
+Nous pouvons créer notre propre service: Pour cela, il faut créer un dossier nommé Service à l'intérieur du dosser src, et créer une classe PHP qui sera donc le service que nous désirons incorporer dans notre application. Bien entendu, il faudra que le nom de notre classe et le nom du fichier concordent, et que le namespace de notre nouvelle classe soit:
+	namespace App\Service
+
+A présent, il faudra écrire les différentes fonctions et les différentes instructions permettant d'implémenter les fonctionnalités désirées. Une fois que ceci est fait, notre nouvelle classe Service est déjà disponible via l'autowire. Il suffira simplement d'ajouter le use en amont de notre Controller et de mentionner le nom de notre classe en paramètre de la fonction de Controller désirée afin de pouvoir instancier l'objet et faire appel à ses fonctions.
+Tout est déjà configuré par défaut dans notre fichier de configuration "config/services.yaml".
