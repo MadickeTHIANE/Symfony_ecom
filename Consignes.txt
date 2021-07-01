@@ -107,3 +107,20 @@ Création d'un formulaire au sein de ficheProduit() lequel permettra de saisir l
 	- Faire en sorte qu'à la création d'une commande dans la fonction buyProduit, la connexion entre l'Utilisateur connecté et la Commande soit automatique
 	- En conséquence, il doit être impossible de créer une Commande sans être connecté, à la fois via le front ou le back (condition supplémentaire dans ficheProduit())
 	- Faire en sorte que le client-dashboard n'affiche que les commandes relatives au user connecté
+
+========================================================================================================================================================================================================================================================================================================================================================
+
+Création d'un nouvel Utilisateur (Client)
+	php bin/console make:entity
+	Client
+
+	- Address
+	- Telephone
+	- PaymentMethod
+
+
+Création d'un nouvel Utilisateur (Admin)
+	php bin/console make:entity
+	Admin
+	
+	- Matricule
