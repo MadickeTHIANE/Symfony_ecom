@@ -105,27 +105,23 @@ class IndexController extends AbstractController
     {
         //* Test du service Variables
         $texte = "Ca marche également si  j'ajoute un paramètre";
-        $test = $variables->getVariables($texte);
+        $test = $variables->test($texte);
 
-        //*Récupération de l'utilisateur
+        //* Récupération de l'utilisateur
         $user = $this->getUser();
 
-        //*Récupération des données nécessaires
+        //* Récupération de l'EntityManager
         $entityManager = $this->getDoctrine()->getManager();
-        $produitRepository = $entityManager->getRepository(Produit::class);
-        $categoryRepository = $entityManager->getRepository(Category::class);
-        $commandeRepository = $entityManager->getRepository(Commande::class);
-        $tagRepository = $entityManager->getRepository(Tag::class);
-        $tags = $tagRepository->findAll();
-        $produit = $produitRepository->find($produitId);
-        $categories = $categoryRepository->findAll();
 
+        //* Récupération des données avec le Service Variables
+        $tags = $variables->getVariables($entityManager)['tags'];
+        $categories = $variables->getVariables($entityManager)['categories'];
+        $produit = $variables->getVariables($entityManager, $produitId)['produit'];
 
-        //*On vérifie si le produit existe
+        //* On vérifie si le produit existe
         if (!$produit) {
             $this->redirect($this->generateUrl('index'));
         }
-
 
         //*Création du formulaire d'achat
         $buyForm = $this->createFormBuilder()
@@ -156,7 +152,7 @@ class IndexController extends AbstractController
                 $reservation->setProduit($produit);
 
                 //On récupére toutes les commandes actives
-                $activeCommandes = $commandeRepository->findByStatut('Panier');
+                $activeCommandes = $variables->getVariables($entityManager, "Panier")['commande'];
 
                 //On récupère la commande du user connecté
                 foreach ($activeCommandes as $activeCommande) {
