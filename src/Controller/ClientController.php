@@ -27,6 +27,10 @@ class ClientController extends AbstractController
 
         //Récupération de l'Utilisateur
         $user = $this->getUser();
+        // //Si l'utilisateur n'est pas connecté, on le redirige vers la page de connexion
+        // if (!$user) {
+        //     return $this->redirect($this->generateUrl('app_login'));
+        // }
 
         //Récupération des commandes de l'utilisateur
         $commandesUser = $user->getCommandes();
@@ -37,7 +41,7 @@ class ClientController extends AbstractController
         $categories = $categoryRepository->findAll();
         $tags = $tagRepository->findAll();
 
-        //Nous récupérons dans le cadre de deux recherches, la liste des Commande validées et la commande en mode Panier du user
+        //Nous récupérons dans le cadre de deux recherches, la liste des Commande validées et la commande en mode Panier
         $commandes = [];
         $activeCommande = null;
         if ($commandesUser) {
@@ -58,7 +62,9 @@ class ClientController extends AbstractController
             'commandes' => $commandes,
         ]);
     }
+    /*
 
+*/
     /**
      * @Route("/commande/validate/{commandeId}",name="commande_validate")
      */

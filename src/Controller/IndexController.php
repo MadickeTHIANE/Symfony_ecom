@@ -110,6 +110,8 @@ class IndexController extends AbstractController
         $produitRepository = $entityManager->getRepository(Produit::class);
         $categoryRepository = $entityManager->getRepository(Category::class);
         $commandeRepository = $entityManager->getRepository(Commande::class);
+        $tagRepository = $entityManager->getRepository(Tag::class);
+        $tags = $tagRepository->findAll();
         $produit = $produitRepository->find($produitId);
         $categories = $categoryRepository->findAll();
 
@@ -198,6 +200,7 @@ class IndexController extends AbstractController
         return $this->render('index/fiche-produit.html.twig', [
             "produit" => $produit,
             "categories" => $categories,
+            "tags" => $tags,
             "dataForm" => $buyForm->createView(),
             "user" => $user
         ]);

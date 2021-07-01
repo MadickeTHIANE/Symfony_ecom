@@ -34,29 +34,28 @@
 
 
 			{% if user is defined %}
-				<div class="w3-dropdown-hover w3-hide-small">
-					<button class="w3-padding-large w3-button" title="More">OPTIONS
-						<i class="fa fa-caret-down"></i>
-					</button>
-					<div class="w3-dropdown-content w3-bar-block w3-card-4">
-						{% if user is not empty %}
+				{% if user is not empty %}
+					<div class="w3-dropdown-hover w3-hide-small">
+						<button class="w3-padding-large w3-button" title="More">OPTIONS
+							<i class="fa fa-caret-down"></i>
+						</button>
+						<div class="w3-dropdown-content w3-bar-block w3-card-4">
 							<a href="{{path('admin_dashboard')}}" class="w3-bar-item w3-button">TABLEAU D'ADMINISTRATION</a>
 							<a href="{{ path('app_logout') }}" class="w3-bar-item w3-button">Déconnexion</a>
-						{% else %}
-							<a href="{{ path('app_login') }}" class="w3-bar-item w3-button">Connexion</a>
-							<a href="{{ path('app_register') }}" class="w3-bar-item w3-button">Inscription</a>
-						{% endif %}
+
+						</div>
 					</div>
-				</div>
-				{% if user is not empty %}
+					{# {% endif %}
+														{% if user is not empty %} #}
 					<a href="{{ path('client_dashboard') }}" class="w3-bar-item w3-button w3-padding-large w3-hide-small w3-right">PANIER</a>
 				{% else %}
 					<a href="{{ path('app_login') }}" class="w3-bar-item w3-button w3-padding-large w3-hide-small w3-right">Connexion</a>
+					<a href="{{ path('user_register') }}" class="w3-bar-item w3-button w3-padding-large w3-hide-small w3-right">Inscription</a>
 				{% endif %}
 			{% endif %}
 			{# <a href="javascript:void(0)" class="w3-padding-large w3-hover-red w3-hide-small w3-right">
-																									<i class="fa fa-search"></i>
-																								</a> #}
+																																																	<i class="fa fa-search"></i>
+																																																</a> #}
 		</div>
 	</div>
 </header>
