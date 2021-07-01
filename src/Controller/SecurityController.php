@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\Admin;
+use App\Entity\Customer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -11,18 +13,18 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 class SecurityController extends AbstractController
 {
 
     /**
      * @Security("is_granted('ROLE_ADMIN')")
-     * @Route("/app_register",name="app_register")
+     * @Route("/admin_register",name="app_register")
      */
     public function register(Request $request, UserPasswordEncoderInterface $passEncoder)
     {
@@ -40,6 +42,9 @@ class SecurityController extends AbstractController
                 'required' => true,
                 'first_options' => ['label' => 'Mot de passe'],
                 'second_options' => ['label' => 'Confirmation du mot de passe'],
+            ])
+            ->add('matricle', TextType::class, [
+                'label' => 'Matricule de l\'utilisateur'
             ])
             ->add('roles', ChoiceType::class, [
                 'choices' => [
@@ -62,10 +67,11 @@ class SecurityController extends AbstractController
         $userForm->handleRequest($request);
         if ($request->isMethod('post') && $userForm->isValid()) {
             $data = $userForm->getData();
-            $user = new User;
+            $user = new Admin;
             $user->setUsername($data['username']);
+            $user->setMatricule($data['matricle']);
             $user->setPassword($passEncoder->encodePassword($user, $data['password']));
-            $user->setRoles(['ROLE_USER']);
+            $user->setRoles($data['roles']);
             $entityManager->persist($user);
             $entityManager->flush();
             return $this->redirect($this->generateUrl('app_login'));
@@ -91,11 +97,24 @@ class SecurityController extends AbstractController
             ->add('username', TextType::class, [
                 'label' => "Nom de l'utilisateur",
             ])
+            ->add('address', TextareaType::class, [
+                'label' => "Adresse de l\'utilisateur",
+            ])
+            ->add('telephone', TextType::class, [
+                'label' => "Téléphone de l\'utilisateur",
+            ])
             ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'required' => true,
                 'first_options' => ['label' => 'Mot de passe'],
                 'second_options' => ['label' => 'Confirmation du mot de passe'],
+            ])
+            ->add('paymentMethod', ChoiceType::class, [
+                'label' => "Méthode de paiement",
+                'choices' => [
+                    'Carte bancaire' => 'carte',
+                    'Chèque' => 'cheque',
+                ]
             ])
             ->add('register', SubmitType::class, [
                 'label' => 'Création',
@@ -109,10 +128,13 @@ class SecurityController extends AbstractController
         $userForm->handleRequest($request);
         if ($request->isMethod('post') && $userForm->isValid()) {
             $data = $userForm->getData();
-            $user = new User;
+            $user = new Customer;
             $user->setUsername($data['username']);
+            $user->setAddress($data['address']);
+            $user->setTelephone($data['telephone']);
+            $user->setPaymentMethod($data['paymentMethod']);
             $user->setPassword($passEncoder->encodePassword($user, $data['password']));
-            $user->setRoles($data['roles']);
+            $user->setRoles(['ROLE_USER']);
             $entityManager->persist($user);
             $entityManager->flush();
             return $this->redirect($this->generateUrl('app_login'));
@@ -120,7 +142,7 @@ class SecurityController extends AbstractController
         //Si le formulaire n'est pas validé, nous chargeons le template générique de formulaire
         return $this->render('index/dataform.html.twig', [
             "dataForm" => $userForm->createView(),
-            "formName" => 'Inscription Utilisateur (Admin)'
+            "formName" => 'Inscription Utilisateur (Customer)'
         ]);
     }
 
