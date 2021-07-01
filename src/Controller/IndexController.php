@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Service\Variables;
 
 class IndexController extends AbstractController
 {
@@ -100,8 +101,12 @@ class IndexController extends AbstractController
     /**
      * @Route("/produit/details/{produitId}",name="fiche_produit")
      */
-    public function ficheProduit(Request $request, $produitId)
+    public function ficheProduit(Request $request, $produitId, Variables $variables)
     {
+        //* Test du service Variables
+        $texte = "Ca marche également si  j'ajoute un paramètre";
+        $test = $variables->getVariables($texte);
+
         //*Récupération de l'utilisateur
         $user = $this->getUser();
 
@@ -202,7 +207,8 @@ class IndexController extends AbstractController
             "categories" => $categories,
             "tags" => $tags,
             "dataForm" => $buyForm->createView(),
-            "user" => $user
+            "user" => $user,
+            "test" => $test
         ]);
     }
 

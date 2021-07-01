@@ -124,3 +124,10 @@ Création d'un nouvel Utilisateur (Admin)
 	Admin
 	
 	- Matricule
+
+========================================================================================================================================================================================================================================================================================================================================================
+
+Utiliser les services afin de prendre en charge toute la procédure de création et de transfert des commandes vers la base de données dans la fonction ficheProduit()
+
+Pour alléger encore davantage produitFiche(), créer un formulaire externalisé non lié à une Entity, chargé de prendre en compte la quantité réservée
+
