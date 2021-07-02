@@ -147,48 +147,8 @@ class IndexController extends AbstractController
             $produitStock = $produit->getStock();
             //Nous vérifions si le stock existe et si l'utilisateur est connecté
             if ($produitStock > 0 && $user) {
-
-                $reservation = new Reservation;
-                $reservation->setProduit($produit);
-
-                //On récupére toutes les commandes actives
-                $activeCommandes = $variables->getVariables($entityManager, "Panier")['commande'];
-
-                //On récupère la commande du user connecté
-                foreach ($activeCommandes as $activeCommande) {
-                    if ($activeCommande->getUser() == $user) {
-                        $userCommande = $activeCommande;
-                    }
-                }
-
-                //Nous vérifions si une Commande est en cours, sinon nous la créons.
-                if (!isset($userCommande)) {
-                    $userCommande = new Commande('Panier', [$reservation]);
-                    $userCommande->setUser($user);
-                    $userCommande->setAdresse('null');
-                } else {
-                    //Nous lui transmettons ensuite notre nouvelle Reservation
-                    $userCommande->addReservation($reservation);
-                }
-
-                //On récupère la quantité commandée
-                $quantity = $data["quantity"];
-                //Nous déterminons la Quantity de notre Reservation avant de l'enregistrer dans une variable
-                $reservationQuantity = $reservation->setQuantity($quantity)->getQuantity();
-                //Notre nouveau stock pour Produit correspond à la différence du stock de Produit et de la quantity de Reservation
-                //Si la quantité commandée est supérieure à la quantité disponible, on fait en sorte de mettre le reste du stock dans la Reservation
-                $produitRequis = $produitStock - $reservationQuantity;
-                if ($produitRequis < 0) {
-                    $reservation->setQuantity($produitStock);
-                    $produit->setStock(0);
-                } else {
-                    $produit->setStock($produitStock - $reservationQuantity);
-                }
-
-                $entityManager->persist($produit);
-                $entityManager->persist($userCommande);
-                $entityManager->persist($reservation);
-                $entityManager->flush();
+                //Si c'est le cas nous procédons à la commande
+                $variables->commandProceed($entityManager, $produit, $user, $produitStock, $data);
 
                 return $this->redirect($this->generateUrl('fiche_produit', [
                     'produitId' => $produit->getId()
