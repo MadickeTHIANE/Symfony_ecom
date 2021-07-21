@@ -90,7 +90,7 @@ class SecurityController extends AbstractController
     {
         //Cette route a pour fonction de créer un nouvel Utilisateur pour notre connexion
         //Pourcela, nous allons créer un formulaire interne de création d'utilisateur
-        //Pour enregistrer notre nouvel utilisatzur dans la BDD, nous avons besoin de l'Entity Manager
+        //Pour enregistrer notre nouvel utilisateur dans la BDD, nous avons besoin de l'Entity Manager
         $entityManager = $this->getDoctrine()->getManager();
         //Nous créons notre formulaire interne
         $userForm = $this->createFormBuilder()

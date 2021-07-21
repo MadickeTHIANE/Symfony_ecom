@@ -3,16 +3,23 @@ Utilisateurs et Sécurité avec Symfony
 Symfony possède plusieurs composants chargés de gérer l'aspect de sécurité et d'identification des utilisateurs. Pour faire simple, Symfony possède un type d'Entity spécial, lequel est chargé de gérer tout l'aspect de la connexion et de la gestion des profils des différents utilisateurs de l'application. La connexion et l'authentification sont gérés par un module annexe, auth (pour Authenticator), lequel est configuré par ses propres classes PHP ainsi que par les options du dossier config (config/packages/security.yaml)
 
 Nous allons donc commencer par créer un Utilisateur (classe User), le configurer, créer l'Authenticator correspondant, et apprendre à gérer l'aspect sécurité de notre application. Afin de créer un User, il ne faut PAS utiliser make:Entity. A la place, il faut utiliser la commande suivante:
+
 	php bin/console make:user
+
+Annotations à ajouter à la classe User :
+* InheritanceType("JOINED") => Les deux tables sont fusionnées pour opérer comme une Entity unique
+* DiscriminatorColumn => Une colonne ajoutée dans la table User pour distinguer quel type d'Entity est lié à notre instance de User, "name" est le nom de la colonne et "type" son type
+* DiscriminatorMap => Liste de toutes les Entity susceptibles d'être comprises dans notre fusion avec la table User. L'Entity User doit obligatoirement y être incorporée sauf si elle est déclarée abstraite
 
 Si le document security.yaml possède un contenu basique avant la création de notre classe Entity User, l'exécution de cette commande modifie le fichier. A présent, une option d'encodage des mots de passe a été ajoutée, ainsi que la création d'un "provider", dont le but est de récupérer les différentes entités utilisateur et se charger du processus d'identification au sein de notre application. Il n'existe à présent qu'une seule Entity prise en charge par notre provider, que nous avons appelé App\Entity\User, mais il est possible (dans le cadre d'applications plus complexes) de faire gérer simultanément plusieurs classes de type utilisateur par le Provider.
 
 Une fois que la classe User a été créée, il reste à ajouter l'élement complémentaire de la gestion de la sécurité sur Symfony, la collection de classes chargées de tout l'aspect connexion et gestion de la session, qui est donc la classe Authenticator.
+
 	php bin/console make:auth
 
 A travers la création de l'Authenticator, un Controller associé à la sécurité est généré (par défaut SecurityController), et une nouvelle classe php est créée, gérant l'aspect de l'authentification, à l'intérieur d'un dossier Security généré l'intérieur du dossier "src" de notre application. Sur notre requête, un formulaire de login et une gestion de la déconnexion (une route /logout) ont également été générés. Ainsi, tout l'aspect de la connexion, déconnexion et gestion de la session sont actuellement pris en charge par nos deux nouveaux modules.
 
-Une fois l'Authenticator créé, il ne faut pas oublier de modifier le fichier contenu dans le dossier security, à la fonction on AuthenticationSuccess(). En effet, la fonction doit être modifiée afin d'ajouter une route valide en cas de connexion directe via la page de login. Il faut donc retirer l'instruction génératrice d'erreur "throw new /Exception" et la remplacer par une redirection vers la page désirée (dans notre cas, l'index).
+Une fois l'Authenticator créé, il ne faut pas oublier de modifier le fichier contenu dans le dossier security, à la fonction  onAuthenticationSuccess(). En effet, la fonction doit être modifiée afin d'ajouter une route valide en cas de connexion directe via la page de login. Il faut donc retirer l'instruction génératrice d'erreur "throw new /Exception" et la remplacer par une redirection vers la page désirée (dans notre cas, l'index).
 	return new RedirectResponse($this->urlGenerator->generate('index'));
 
 Une fois que l'Utilisateur et l'Authenticator sont créés, il faudra actualiser l'état de notre base de données via une migration.

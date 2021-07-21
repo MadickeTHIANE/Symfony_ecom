@@ -135,7 +135,7 @@ class IndexController extends AbstractController
             ->add('valider', SubmitType::class, [
                 "label" => "Valider",
                 "attr" => [
-                    "class" => "w3 w3-black"
+                    "class" => "w3 w3-black mt-2"
                 ]
             ])
             ->getForm();
